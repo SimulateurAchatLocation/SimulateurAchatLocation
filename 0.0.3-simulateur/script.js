@@ -221,6 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
     calculAddtionalSavingsPlacedScenario1(monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingsRate, loanDuration);
     calculTotalScenario1(propertyValueAmount, monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingsRate, loanDuration, remainingSavingsAmount, inflationRateCharges);
     calculBestResult(propertyValueAmount, monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingsRate, loanDuration, remainingSavingsAmount, inflationRateCharges, initialSavings, monthlyPropertyChargesOfRentedProperty, annualPropertyTaxOfRentedProperty, agencyFees, grossMonthlyRentReceived, taxBracket, rentalIncomeRevaluationRate);
+    showAttentionPicto(remainingSavingsAmount, propertyValueAmount, monthlySavingsCapacity, loanDuration, netInvestmentSavingsRate, initialSavings, monthlyPropertyCharges, inflationRateCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, monthlyPropertyChargesOfRentedProperty, annualPropertyTaxOfRentedProperty, agencyFees, grossMonthlyRentReceived, taxBracket, rentalIncomeRevaluationRate);
   }
 
   function areRequiredFieldsFilled(monthlyPropertyCharges, initialSavings, monthlySavingsCapacity, realEstatePrice, aquisitionCosts) {
@@ -536,13 +537,9 @@ function calculBestResult(propertyValueAmount, monthlySavingsCapacity, monthlyPr
   resultWrapperScenario2.classList.remove('is-best-result');
   resultWrapperScenario3.classList.remove('is-best-result');
 
-  // const resultProfitableScenario1 = document.querySelector('.simulator_profitable-grid.is-scenario1');
-  // const resultProfitableScenario2 = document.querySelector('.simulator_profitable-grid.is-scenario2');
-  // const resultProfitableScenario3 = document.querySelector('.simulator_profitable-grid.is-scenario3');
-
-  const resultProfitableScenario1 = document.getElementById('result-profitable-1');
-  const resultProfitableScenario2 = document.getElementById('result-profitable-2');
-  const resultProfitableScenario3 = document.getElementById('result-profitable-3');
+  const resultProfitableScenario1 = document.getElementById('profitable-1');
+  const resultProfitableScenario2 = document.getElementById('profitable-2');
+  const resultProfitableScenario3 = document.getElementById('profitable-3');
 
   resultProfitableScenario1.classList.add('hide');
   resultProfitableScenario2.classList.add('hide');
@@ -563,5 +560,50 @@ function calculBestResult(propertyValueAmount, monthlySavingsCapacity, monthlyPr
   } else {
     resultWrapperScenario3.classList.add('is-best-result');
     resultProfitableScenario3.classList.remove('hide');
+  }
+}
+
+
+function showAttentionPicto(remainingSavingsAmount, propertyValueAmount, monthlySavingsCapacity, loanDuration, netInvestmentSavingsRate, initialSavings, monthlyPropertyCharges, inflationRateCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, monthlyPropertyChargesOfRentedProperty, annualPropertyTaxOfRentedProperty, agencyFees, grossMonthlyRentReceived, taxBracket, rentalIncomeRevaluationRate) {
+  const totalResultScenario2 = calculTotalScenario2(monthlySavingsCapacity, loanDuration, netInvestmentSavingsRate, initialSavings, monthlyPropertyCharges, inflationRateCharges);
+
+  const notEnoughMoney2 = document.getElementById('not-enough-money-2');
+  const savingsConsuming2 = document.getElementById('savings-consuming-2');
+
+  notEnoughMoney2.classList.add('hide');
+  savingsConsuming2.classList.add('hide');
+
+  if (totalResultScenario2 < 0) {
+    notEnoughMoney2.classList.remove('hide');
+  } else if (0 < totalResultScenario2 && totalResultScenario2 < remainingSavingsAmount) {
+    savingsConsuming2.classList.remove('hide');
+  }
+
+  const totalResultScenario1 = calculTotalScenario1(propertyValueAmount, monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingsRate, loanDuration, remainingSavingsAmount, inflationRateCharges);
+
+  const notEnoughMoney1 = document.getElementById('not-enough-money-1');
+  const savingsConsuming1 = document.getElementById('savings-consuming-1');
+
+  notEnoughMoney1.classList.add('hide');
+  savingsConsuming1.classList.add('hide');
+
+  if ((totalResultScenario1 - propertyValueAmount) < 0) {
+    notEnoughMoney1.classList.remove('hide');
+  } else if (0 < (totalResultScenario1 - propertyValueAmount) && (totalResultScenario1 - propertyValueAmount) < remainingSavingsAmount) {
+    savingsConsuming1.classList.remove('hide');
+  }
+
+  const totalResultScenario3 = calculTotalScenario3(propertyValueAmount, monthlySavingsCapacity, monthlyLoanPaymentAmount, monthlyPropertyChargesOfRentedProperty, annualPropertyTaxOfRentedProperty, agencyFees, grossMonthlyRentReceived, taxBracket, loanDuration, netInvestmentSavingsRate, remainingSavingsAmount, monthlyPropertyCharges, inflationRateCharges, rentalIncomeRevaluationRate);
+
+  const notEnoughMoney3 = document.getElementById('not-enough-money-3');
+  const savingsConsuming3 = document.getElementById('savings-consuming-3');
+
+  notEnoughMoney3.classList.add('hide');
+  savingsConsuming3.classList.add('hide');
+
+  if ((totalResultScenario3 - propertyValueAmount) < 0) {
+    notEnoughMoney3.classList.remove('hide');
+  } else if (0 < (totalResultScenario3 - propertyValueAmount) && (totalResultScenario3 - propertyValueAmount) < remainingSavingsAmount) {
+    savingsConsuming3.classList.remove('hide');
   }
 }
