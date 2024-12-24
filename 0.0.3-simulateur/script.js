@@ -30,8 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const spanInput = document.getElementById("deposit-value");
   const realEstatePriceInput = document.getElementById("real-estate-price");
   const acquisitionCostsInput = document.getElementById("acquisition-costs");
+  const initialSavingsInput = document.getElementById("initial-savings");
 
-  // Fonction de calcul du capital emprunté
   function calculBorrowedCapital(realEstatePrice, acquisitionCosts, deposit) {
     const borrowedCapitalText = document.getElementById('borrowed-capital');
     const borrowedCapitalResult = Math.round(realEstatePrice + acquisitionCosts - deposit);
@@ -39,57 +39,66 @@ document.addEventListener("DOMContentLoaded", () => {
     return borrowedCapitalResult;
   }
 
-  // Fonction de mise à jour des calculs
   const updateCalculations = (deposit) => {
     const realEstatePrice = parseFloat(realEstatePriceInput.value);
     const acquisitionCosts = parseFloat(acquisitionCostsInput.value);
     calculBorrowedCapital(realEstatePrice, acquisitionCosts, deposit);
   };
 
-  // Synchronisation : Curseur → Champ manuel
+  const validateDepositLimit = (value) => {
+    const maxDeposit = parseFloat(initialSavingsInput.value) || 0;
+    return Math.min(value, maxDeposit);
+  };
+
   rangeInput.addEventListener("input", () => {
-    const value = parseInt(rangeInput.value, 10);
-    spanInput.textContent = value.toLocaleString("fr-FR"); // Formatage avec espace
+    let value = parseInt(rangeInput.value, 10);
+    value = validateDepositLimit(value);
+    rangeInput.value = value;
+    spanInput.textContent = value.toLocaleString("fr-FR");
     updateCalculations(value);
   });
 
-  // Synchronisation : Champ manuel → Curseur et Calculs
   spanInput.addEventListener("input", () => {
-    let rawValue = spanInput.textContent.replace(/\s+/g, ""); // Supprime les espaces
+    let rawValue = spanInput.textContent.replace(/\s+/g, "");
     let value = parseInt(rawValue, 10);
 
     if (!isNaN(value)) {
-      if (value >= parseInt(rangeInput.min, 10) && value <= parseInt(rangeInput.max, 10)) {
-        rangeInput.value = value; // Mettre à jour le curseur si dans la plage
-      } else if (value > parseInt(rangeInput.max, 10)) {
-        rangeInput.value = rangeInput.max; // Curseur au max si valeur au-delà de la plage
-      }
-      updateCalculations(value); // Mise à jour des calculs
+      value = validateDepositLimit(value);
+      rangeInput.value = value;
+      updateCalculations(value);
     }
   });
 
-  // Nettoyage et validation à la perte de focus
   spanInput.addEventListener("blur", () => {
-    let rawValue = spanInput.textContent.replace(/\s+/g, ""); // Supprime les espaces
+    let rawValue = spanInput.textContent.replace(/\s+/g, "");
     let value = parseInt(rawValue, 10);
 
     if (!isNaN(value)) {
-      spanInput.textContent = value.toLocaleString("fr-FR"); // Reformate avec espaces
+      value = validateDepositLimit(value);
+      spanInput.textContent = value.toLocaleString("fr-FR");
+      rangeInput.value = value;
       updateCalculations(value);
     } else {
-      // Réinitialiser à la dernière valeur connue si la saisie est invalide
       spanInput.textContent = parseInt(rangeInput.value, 10).toLocaleString("fr-FR");
     }
   });
 
-  // Empêche les caractères non numériques
   spanInput.addEventListener("keypress", (event) => {
     if (!/[\d\s]/.test(event.key)) {
       event.preventDefault();
     }
   });
 
-  // Initialiser les calculs à partir de la valeur par défaut
+  initialSavingsInput.addEventListener("input", () => {
+    const maxSavings = parseFloat(initialSavingsInput.value) || 0;
+    let currentDeposit = parseInt(rangeInput.value, 10);
+    if (currentDeposit > maxSavings) {
+      rangeInput.value = maxSavings;
+      spanInput.textContent = maxSavings.toLocaleString("fr-FR");
+      updateCalculations(maxSavings);
+    }
+  });
+
   updateCalculations(parseInt(rangeInput.value, 10));
 });
 
@@ -106,6 +115,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const loanRateSlider = document.getElementById('loan-rate');
   const insuranceRateSlider = document.getElementById('insurance-rate');
   const loanDurationSlider = document.getElementById('loan-duration');
+
+  function validateDepositLimit() {
+    const initialSavings = parseFloat(initialSavingsInput.value) || 0;
+    const depositValue = parseFloat(depositSlider.value) || 0;
+
+    if (depositValue > initialSavings) {
+      depositSlider.value = initialSavings;
+    }
+  }
+
+  initialSavingsInput.addEventListener('input', validateDepositLimit);
+  depositSlider.addEventListener('input', validateDepositLimit);
 
   const netInvestmentSavingqRateSlider = document.getElementById('net-investment-savings-rate');
   const rateOfChangeSlider = document.getElementById('rate-of-change');
@@ -175,14 +196,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById('loan-duration-result').textContent = loanDuration;
 
+    if (!areRequiredFieldsFilled(monthlyPropertyCharges, initialSavings, monthlySavingsCapacity, realEstatePrice, aquisitionCosts)) {
+      document.getElementById('borrowed-capital').innerHTML = 'O';
+      console.log("Veuillez remplir tous les champs requis avant de lancer les calculs.");
+      return;
+    }
+
     const borrowedCapitalAmount = calculBorrowedCapital(realEstatePrice, aquisitionCosts, deposit);
-    // calculCostOfInsurance(borrowedCapitalAmount, loanDuration, insuranceRateSlider);
     const costOfInsuranceAmount = calculCostOfInsurance(borrowedCapitalAmount, loanDuration, insuranceRateSlider);
     const monthlyLoanPaymentAmount = calculMonthlyLoanPayment(borrowedCapitalAmount, loanDuration, loanRateSlider, costOfInsuranceAmount);
     calculLoanCost(loanDuration, borrowedCapitalAmount, costOfInsuranceAmount, monthlyLoanPaymentAmount);
     const remainingSavingsAmount = calculRemainaingSavings(initialSavings, depositSlider);
     const propertyValueAmount = calculValueOfProperty(realEstatePrice, rateOfChange, loanDuration);
-    // calculAddtionalSavingsPlacedScenario1(monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingqRate, loanDuration);
     calculInitialSavingsPlaced(remainingSavingsAmount, netInvestmentSavingsRate, loanDuration);
     calculAdditionalCostOfInflationRpCharges(monthlyPropertyChargesRp, annualPropertyTaxRp, loanDuration, inflationRateCharges);
     calculAdditionalSavingsPlacedScenario2(monthlySavingsCapacity, loanDuration, netInvestmentSavingsRate);
@@ -196,6 +221,16 @@ document.addEventListener("DOMContentLoaded", () => {
     calculAddtionalSavingsPlacedScenario1(monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingsRate, loanDuration);
     calculTotalScenario1(propertyValueAmount, monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingsRate, loanDuration, remainingSavingsAmount, inflationRateCharges);
     calculBestResult(propertyValueAmount, monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingsRate, loanDuration, remainingSavingsAmount, inflationRateCharges, initialSavings, monthlyPropertyChargesOfRentedProperty, annualPropertyTaxOfRentedProperty, agencyFees, grossMonthlyRentReceived, taxBracket, rentalIncomeRevaluationRate);
+  }
+
+  function areRequiredFieldsFilled(monthlyPropertyCharges, initialSavings, monthlySavingsCapacity, realEstatePrice, aquisitionCosts) {
+    return (
+        !isNaN(monthlyPropertyCharges) &&
+        !isNaN(initialSavings) &&
+        !isNaN(monthlySavingsCapacity) &&
+        !isNaN(realEstatePrice) &&
+        !isNaN(aquisitionCosts)
+    );
   }
 });
 
