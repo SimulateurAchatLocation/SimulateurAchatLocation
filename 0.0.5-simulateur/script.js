@@ -242,8 +242,8 @@ function calculOnInputEventListener(input, calculFunction) {
 function calculBorrowedCapital(realEstatePrice, aquisitionCosts, deposit) {
     const borrowedCapitalText = document.getElementById('borrowed-capital');
 
-    const borrowedCapitalResult = Math.round(realEstatePrice + aquisitionCosts - deposit);
-    borrowedCapitalText.textContent = borrowedCapitalResult.toLocaleString("fr-FR");
+    const borrowedCapitalResult = realEstatePrice + aquisitionCosts - deposit;
+    borrowedCapitalText.textContent = Math.round(borrowedCapitalResult).toLocaleString("fr-FR");
 
     return borrowedCapitalResult;
 }
@@ -268,10 +268,10 @@ function calculMonthlyLoanPayment(borrowedCapitalAmount, loanDuration, loanRateS
   const monthlyLoanRate = annualLoanRate / 12 / 100;
   const totalMonths = loanDuration * 12;
 
-  const monthlyPayment = borrowedCapitalAmount * monthlyLoanRate / (1 - Math.pow(1 + monthlyLoanRate, -totalMonths));
+  const monthlyPayment = borrowedCapitalAmount * monthlyLoanRate / (1 - (1 + monthlyLoanRate) ** -totalMonths);
 
-  const totalMonthlyPayment = Math.round(monthlyPayment + (costOfInsuranceAmount / totalMonths));
-  monthlyLoadPaymentText.textContent = totalMonthlyPayment.toLocaleString("fr-FR");
+  const totalMonthlyPayment = monthlyPayment + (costOfInsuranceAmount / totalMonths);
+  monthlyLoadPaymentText.textContent = Math.round(totalMonthlyPayment).toLocaleString("fr-FR");
 
   return totalMonthlyPayment;
 }
@@ -281,8 +281,8 @@ function calculCostOfInsurance(borrowedCapitalAmount, loanDuration, insuranceRat
 
     const insuranceRate = parseFloat(insuranceRateSlider.value);
 
-    const costOfInsuranceResult = Math.round(borrowedCapitalAmount * loanDuration * (insuranceRate / 100));
-    costOfInsuranceText.textContent = costOfInsuranceResult.toLocaleString("fr-FR");
+    const costOfInsuranceResult = borrowedCapitalAmount * loanDuration * (insuranceRate / 100);
+    costOfInsuranceText.textContent = Math.round(costOfInsuranceResult).toLocaleString("fr-FR");
 
     return costOfInsuranceResult;
 }
@@ -290,8 +290,8 @@ function calculCostOfInsurance(borrowedCapitalAmount, loanDuration, insuranceRat
 function calculLoanCost(loanDuration, borrowedCapitalAmount, costOfInsuranceAmount, monthlyLoanPaymentAmount) {
     const loanCostText = document.getElementById('loan-cost');
 
-    const loanCostResult = Math.round(12 * loanDuration * monthlyLoanPaymentAmount - borrowedCapitalAmount - costOfInsuranceAmount);
-    loanCostText.textContent = loanCostResult.toLocaleString("fr-FR");
+    const loanCostResult = 12 * loanDuration * monthlyLoanPaymentAmount - borrowedCapitalAmount - costOfInsuranceAmount;
+    loanCostText.textContent = Math.round(loanCostResult).toLocaleString("fr-FR");
 
     return loanCostResult;
 }
@@ -301,8 +301,8 @@ function calculRemainaingSavings(initialSavings, depositSlider) {
 
     const deposit = parseFloat(depositSlider.value);
 
-    const remainingSavingsResult = Math.round(initialSavings - deposit);
-    remainingSavingsText.textContent = remainingSavingsResult.toLocaleString("fr-FR");
+    const remainingSavingsResult = initialSavings - deposit;
+    remainingSavingsText.textContent = Math.round(remainingSavingsResult).toLocaleString("fr-FR");
 
     return remainingSavingsResult;
 }
@@ -310,9 +310,9 @@ function calculRemainaingSavings(initialSavings, depositSlider) {
 function calculValueOfProperty(realEstatePrice, rateOfChange, loanDuration) {
   const valueOfPropertyText = document.querySelectorAll('.value-of-property');
 
-  const valueOfPropertyResult = Math.round(realEstatePrice * Math.pow(1 + rateOfChange, loanDuration));
+  const valueOfPropertyResult = realEstatePrice * (1 + rateOfChange) ** loanDuration;
   valueOfPropertyText.forEach((text) => {
-    text.textContent = valueOfPropertyResult.toLocaleString("fr-FR");
+    text.textContent = Math.round(valueOfPropertyResult).toLocaleString("fr-FR");
   });
 
   return valueOfPropertyResult;
@@ -321,9 +321,9 @@ function calculValueOfProperty(realEstatePrice, rateOfChange, loanDuration) {
 function calculInitialSavingsPlaced(remainingSavingsAmount, netInvestmentSavingsRate, loanDuration) {
   const initialSavingsPlacedText = document.querySelectorAll('.initial-savings-placed');
 
-  const initialSavingsPlacedResult = Math.round(remainingSavingsAmount * Math.pow(1 + netInvestmentSavingsRate, loanDuration));
+  const initialSavingsPlacedResult = remainingSavingsAmount * (1 + netInvestmentSavingsRate) ** loanDuration;
   initialSavingsPlacedText.forEach((text) => {
-    text.textContent = initialSavingsPlacedResult.toLocaleString("fr-FR");
+    text.textContent = Math.round(initialSavingsPlacedResult).toLocaleString("fr-FR");
   });
 
   return initialSavingsPlacedResult;
@@ -332,13 +332,10 @@ function calculInitialSavingsPlaced(remainingSavingsAmount, netInvestmentSavings
 function calculAdditionalCostOfInflationRentalCharges(monthlyPropertyCharges, loanDuration, inflationRateCharges) {
   const additionalCostOfInflationRentalChargesText = document.querySelectorAll('.additional-cost-of-inflation-rental-charges');
 
-  const additionalCostOfInflationRentalChargesResult = Math.round(
-    12 * monthlyPropertyCharges *
-    (loanDuration - (Math.pow(1 + inflationRateCharges, loanDuration) - 1) / inflationRateCharges)
-  );  
+  const additionalCostOfInflationRentalChargesResult = 12 * monthlyPropertyCharges * (loanDuration - ((1 + inflationRateCharges) ** loanDuration - 1) / inflationRateCharges);
 
   additionalCostOfInflationRentalChargesText.forEach((text) => {
-    text.textContent = additionalCostOfInflationRentalChargesResult.toLocaleString("fr-FR");
+    text.textContent = Math.round(additionalCostOfInflationRentalChargesResult).toLocaleString("fr-FR");
   });
 
   return additionalCostOfInflationRentalChargesResult;
@@ -354,13 +351,13 @@ function calculAddtionalSavingsPlacedScenario1(monthlySavingsCapacity, monthlyPr
 
   if ((monthlySavingsCapacity + monthlyPropertyCharges - monthlyLoanPaymentAmount - monthlyPropertyChargesRp - (annualPropertyTaxRp / 12)) > 0) {
     additionalSavingsPlacedResult = 12 * (monthlySavingsCapacity + monthlyPropertyCharges - monthlyLoanPaymentAmount - monthlyPropertyChargesRp - (annualPropertyTaxRp / 12)) * (
-      (Math.pow(1 + netInvestmentSavingsRate, loanDuration) - 1) / netInvestmentSavingsRate
-    );
+      ((1 + netInvestmentSavingsRate) ** loanDuration - 1) / netInvestmentSavingsRate
+    );    
   } else {
     additionalSavingsPlacedResult = 12 * (monthlySavingsCapacity + monthlyPropertyCharges - monthlyLoanPaymentAmount - monthlyPropertyChargesRp - (annualPropertyTaxRp / 12)) * loanDuration;
   }  
 
-  additionalSavingsPlacedText.textContent = additionalSavingsPlacedResult.toLocaleString("fr-FR");
+  additionalSavingsPlacedText.textContent = Math.round(additionalSavingsPlacedResult).toLocaleString("fr-FR");
 
   return additionalSavingsPlacedResult;
 }
@@ -370,11 +367,13 @@ function calculAdditionalCostOfInflationRpCharges(monthlyPropertyChargesRp, annu
   const additionalCostOfInflationRpChargesText = document.getElementById('additional-cost-of-inflation-rp-charges');
 
   const charges = 12 * monthlyPropertyChargesRp + annualPropertyTaxRp;
-  const inflationFactor = (Math.pow(1 + inflationRateCharges, loanDuration) - 1) / inflationRateCharges;
+  const inflationFactor = ((1 + inflationRateCharges) ** loanDuration - 1) / inflationRateCharges;
 
-  const additionalCostOfInflationRpChargesResult = Math.round(charges * inflationFactor);
+  // const additionalCostOfInflationRpChargesResult = Math.round(charges * inflationFactor);
 
-  additionalCostOfInflationRpChargesText.textContent = additionalCostOfInflationRpChargesResult.toLocaleString("fr-FR");
+  const additionalCostOfInflationRpChargesResult = (loanDuration - charges) * inflationFactor;
+
+  additionalCostOfInflationRpChargesText.textContent = Math.round(additionalCostOfInflationRpChargesResult).toLocaleString("fr-FR");
 
   return additionalCostOfInflationRpChargesResult;
 }
@@ -388,8 +387,8 @@ function calculTotalScenario1(propertyValueAmount, monthlySavingsCapacity, month
 
   const additionalCostOfInflationRpCharges = calculAdditionalCostOfInflationRpCharges(monthlyPropertyChargesRp, annualPropertyTaxRp, loanDuration, inflationRateCharges); 
 
-  const totalResult = Math.round(propertyValueAmount + additionalSavingsPlaced + initialSavingsPlaced + additionalCostOfInflationRpCharges);
-  totalText.textContent = totalResult.toLocaleString("fr-FR");
+  const totalResult = propertyValueAmount + additionalSavingsPlaced + initialSavingsPlaced + additionalCostOfInflationRpCharges;
+  totalText.textContent = Math.round(totalResult).toLocaleString("fr-FR");
 
   return totalResult;
 }
@@ -401,12 +400,9 @@ function calculTotalScenario1(propertyValueAmount, monthlySavingsCapacity, month
 function calculAdditionalSavingsPlacedScenario2(monthlySavingsCapacity, loanDuration, netInvestmentSavingsRate) {
   const additionalSavingsPlacedText = document.getElementById('additional-savings-placed-2');
 
-  const additionalSavingsPlacedResult = Math.round(
-    (12 * monthlySavingsCapacity * ((Math.pow(1 + netInvestmentSavingsRate, loanDuration)) - 1)) 
-    / netInvestmentSavingsRate
-  );  
+  const additionalSavingsPlacedResult = (12 * monthlySavingsCapacity * ((1 + netInvestmentSavingsRate) ** loanDuration - 1)) / netInvestmentSavingsRate;
 
-  additionalSavingsPlacedText.textContent = additionalSavingsPlacedResult.toLocaleString("fr-FR");
+  additionalSavingsPlacedText.textContent = Math.round(additionalSavingsPlacedResult).toLocaleString("fr-FR");
 
   return additionalSavingsPlacedResult;
 }
@@ -414,8 +410,8 @@ function calculAdditionalSavingsPlacedScenario2(monthlySavingsCapacity, loanDura
 function calculInitialSavingsPlacedScenario2(initialSavings, netInvestmentSavingsRate, loanDuration) {
   const initialSavingsPlacedText = document.getElementById('initial-savings-placed-2');
 
-  const initialSavingsPlacedResult = Math.round(initialSavings * Math.pow(1 + netInvestmentSavingsRate, loanDuration));
-  initialSavingsPlacedText.textContent = initialSavingsPlacedResult.toLocaleString("fr-FR");
+  const initialSavingsPlacedResult = initialSavings * (1 + netInvestmentSavingsRate) ** loanDuration;
+  initialSavingsPlacedText.textContent = Math.round(initialSavingsPlacedResult).toLocaleString("fr-FR");
 
   return initialSavingsPlacedResult;
 }
@@ -429,8 +425,8 @@ function calculTotalScenario2(monthlySavingsCapacity, loanDuration, netInvestmen
 
   const additionalCostOfInflationRentalCharges = calculAdditionalCostOfInflationRentalCharges(monthlyPropertyCharges, loanDuration, inflationRateCharges); 
 
-  const totalResult = Math.round(additionalSavingsPlaced + initialSavingsPlaced + additionalCostOfInflationRentalCharges);
-  totalText.textContent = totalResult.toLocaleString("fr-FR");
+  const totalResult = additionalSavingsPlaced + initialSavingsPlaced + additionalCostOfInflationRentalCharges;
+  totalText.textContent = Math.round(totalResult).toLocaleString("fr-FR");
 
   return totalResult;
 }
@@ -473,16 +469,12 @@ function calculAddtionalSavingsPlacedScenario3(
   const availableAmount = monthlySavingsCapacity - monthlyLoanPaymentAmount - monthlyPropertyChargesOfRentedProperty - (annualPropertyTaxOfRentedProperty / 12) - agencyFees + grossMonthlyRentReceived * (1 - 0.7 * (taxBracket + 0.172));
 
   if (availableAmount > 0) {
-    additionalSavingsPlacedResult = Math.round(
-      12 * availableAmount * (Math.pow(1 + netInvestmentSavingsRate, loanDuration) - 1) / netInvestmentSavingsRate
-    );
+    additionalSavingsPlacedResult = 12 * availableAmount * ((1 + netInvestmentSavingsRate) ** loanDuration - 1) / netInvestmentSavingsRate;
   } else {
-    additionalSavingsPlacedResult = Math.round(
-      12 * loanDuration * availableAmount
-    );
+    additionalSavingsPlacedResult = 12 * loanDuration * availableAmount;
   }
 
-  additionalSavingsPlacedText.textContent = additionalSavingsPlacedResult.toLocaleString("fr-FR");
+  additionalSavingsPlacedText.textContent = Math.round(additionalSavingsPlacedResult).toLocaleString("fr-FR");
 
   return additionalSavingsPlacedResult;
 }
@@ -491,8 +483,8 @@ function calculAddtionalSavingsPlacedScenario3(
 function calculRevaluationOfRentalIncome(grossMonthlyRentReceived, taxBracket, rentalIncomeRevaluationRate, loanDuration) {
   const revaluationOfRentalIncomeText = document.getElementById('revaluation-of-rental-income');
 
-  const revaluationOfRentalIncomeResult = Math.round(12 * grossMonthlyRentReceived * (1 - 0.7 * (taxBracket + 0.172)) * (((((1 + rentalIncomeRevaluationRate) ** loanDuration) - 1) / rentalIncomeRevaluationRate) - loanDuration));
-  revaluationOfRentalIncomeText.textContent = revaluationOfRentalIncomeResult.toLocaleString("fr-FR");
+  const revaluationOfRentalIncomeResult = 12 * grossMonthlyRentReceived * (1 - 0.7 * (taxBracket + 0.172)) * (((((1 + rentalIncomeRevaluationRate) ** loanDuration) - 1) / rentalIncomeRevaluationRate) - loanDuration);
+  revaluationOfRentalIncomeText.textContent = Math.round(revaluationOfRentalIncomeResult).toLocaleString("fr-FR");
 
   return revaluationOfRentalIncomeResult;
 }
@@ -500,8 +492,8 @@ function calculRevaluationOfRentalIncome(grossMonthlyRentReceived, taxBracket, r
 function calculAdditionalCostInflationChargesOfTheRentedProperty(annualPropertyTaxOfRentedProperty, monthlyPropertyChargesOfRentedProperty, loanDuration, inflationRateCharges) {
   const additionalCostInflationChargesOfTheRentedPropertyText = document.getElementById('additional-cost-inflation-charges-of-the-rented-property');
 
-  const additionalCostInflationChargesOfTheRentedPropertyResult = Math.round((annualPropertyTaxOfRentedProperty + 12 * monthlyPropertyChargesOfRentedProperty) * (loanDuration - ((((1 + inflationRateCharges) ** loanDuration) - 1) / inflationRateCharges)));
-  additionalCostInflationChargesOfTheRentedPropertyText.textContent = additionalCostInflationChargesOfTheRentedPropertyResult.toLocaleString("fr-FR");
+  const additionalCostInflationChargesOfTheRentedPropertyResult = (annualPropertyTaxOfRentedProperty + 12 * monthlyPropertyChargesOfRentedProperty) * (loanDuration - ((((1 + inflationRateCharges) ** loanDuration) - 1) / inflationRateCharges));
+  additionalCostInflationChargesOfTheRentedPropertyText.textContent = Math.round(additionalCostInflationChargesOfTheRentedPropertyResult).toLocaleString("fr-FR");
 
   return additionalCostInflationChargesOfTheRentedPropertyResult;
 }
@@ -519,8 +511,8 @@ function calculTotalScenario3(propertyValueAmount, monthlySavingsCapacity, month
 
   const additionalCostInflationChargesOfTheRentedProperty =  calculAdditionalCostInflationChargesOfTheRentedProperty(annualPropertyTaxOfRentedProperty, monthlyPropertyChargesOfRentedProperty, loanDuration, inflationRateCharges)
 
-  const totalResult = Math.round(propertyValueAmount + additionalSavingsPlaced + initialSavingsPlaced + additionalCostOfInflationRentalCharges + revaluationOfRentalIncome + additionalCostInflationChargesOfTheRentedProperty);
-  totalText.textContent = totalResult.toLocaleString("fr-FR");
+  const totalResult = propertyValueAmount + additionalSavingsPlaced + initialSavingsPlaced + additionalCostOfInflationRentalCharges + revaluationOfRentalIncome + additionalCostInflationChargesOfTheRentedProperty;
+  totalText.textContent = Math.round(totalResult).toLocaleString("fr-FR");
 
   return totalResult;
 }
