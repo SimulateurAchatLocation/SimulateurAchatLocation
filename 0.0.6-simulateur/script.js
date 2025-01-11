@@ -371,7 +371,7 @@ function calculAdditionalCostOfInflationRpCharges(monthlyPropertyChargesRp, annu
 
   // const additionalCostOfInflationRpChargesResult = Math.round(charges * inflationFactor);
 
-  const additionalCostOfInflationRpChargesResult = (loanDuration - charges) * inflationFactor;
+  const additionalCostOfInflationRpChargesResult = (loanDuration - inflationFactor) * charges;
 
   additionalCostOfInflationRpChargesText.textContent = Math.round(additionalCostOfInflationRpChargesResult).toLocaleString("fr-FR");
 
