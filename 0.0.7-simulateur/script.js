@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
   
-
 document.addEventListener("DOMContentLoaded", () => {
   const rangeInput = document.getElementById("deposit");
   const spanInput = document.getElementById("deposit-value");
@@ -42,7 +41,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const updateCalculations = (deposit) => {
     const realEstatePrice = parseFloat(realEstatePriceInput.value);
     const acquisitionCosts = parseFloat(acquisitionCostsInput.value);
-    calculBorrowedCapital(realEstatePrice, acquisitionCosts, deposit);
+    const borrowedCapitalAmount = calculBorrowedCapital(realEstatePrice, acquisitionCosts, deposit);
+
+    if (isNaN(borrowedCapitalAmount)) {
+      document.getElementById('borrowed-capital').textContent = 'O';
+    }
   };
 
   const validateDepositLimit = (value) => {
@@ -75,11 +78,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!isNaN(value)) {
       value = validateDepositLimit(value);
-      spanInput.textContent = value.toLocaleString("fr-FR");
+      spanInput.textContent = value;
       rangeInput.value = value;
       updateCalculations(value);
     } else {
-      spanInput.textContent = parseInt(rangeInput.value, 10).toLocaleString("fr-FR");
+      spanInput.textContent = parseInt(rangeInput.value, 10);
     }
   });
 
@@ -94,14 +97,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentDeposit = parseInt(rangeInput.value, 10);
     if (currentDeposit > maxSavings) {
       rangeInput.value = maxSavings;
-      spanInput.textContent = maxSavings.toLocaleString("fr-FR");
+      spanInput.textContent = maxSavings;
       updateCalculations(maxSavings);
     }
   });
 
   updateCalculations(parseInt(rangeInput.value, 10));
 });
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const monthlyPropertyChargesInput = document.getElementById('monthly-property-charges');
@@ -141,6 +143,44 @@ document.addEventListener("DOMContentLoaded", () => {
   const annualPropertyTaxOfRentedPropertySlider = document.getElementById('annual-property-tax-of-rented-property');
   const monthlyPropertyChargesOfRentedPropertySlider = document.getElementById('monthly-property-charges-of-rented-property');
 
+  const rangeInputs = document.querySelectorAll('.range-input');
+
+  rangeInputs.forEach((input) => {
+    const span = input.nextElementSibling;
+    span.textContent = input.value;
+    input.dataset.actualValue = input.value; 
+
+    input.addEventListener('input', function () {
+      const value = parseFloat(input.value);
+      span.textContent = value;
+      input.dataset.actualValue = value;
+      updateCalculations(); 
+    });
+
+    span.addEventListener('input', function () {
+      const value = parseFloat(span.textContent);
+      if (!isNaN(value)) {
+        input.value = value;
+        input.dataset.actualValue = value;
+        updateCalculations();
+      } else {
+        console.warn('Invalid input in span (real-time):', span.textContent);
+      }
+    });
+
+    span.addEventListener('blur', function () {
+      const value = parseFloat(span.textContent);
+      if (!isNaN(value)) {
+        input.value = value;
+        input.dataset.actualValue = value;
+        updateCalculations();
+      } else {
+        span.textContent = input.value;
+        console.warn('Invalid input in span. Resetting to:', input.value);
+      }
+    });
+  });
+
   calculOnInputEventListener(monthlyPropertyChargesInput, updateCalculations);
   calculOnInputEventListener(initialSavingsInput, updateCalculations);
   calculOnInputEventListener(monthlySavingsCapacityInput, updateCalculations);
@@ -166,8 +206,28 @@ document.addEventListener("DOMContentLoaded", () => {
   calculOnInputEventListener(annualPropertyTaxOfRentedPropertySlider, updateCalculations);
   calculOnInputEventListener(monthlyPropertyChargesOfRentedPropertySlider, updateCalculations);
 
-  // Fonction générique qui met à jour les calculs
+
   function updateCalculations() {
+    /*const rangeValues = document.querySelectorAll('.range-value');
+
+    rangeValues.forEach(span => {
+      span.addEventListener('input', function() {
+        const input = span.previousElementSibling;
+
+        if (!isNaN(parseFloat(span.textContent))) {
+          input.value = parseFloat(span.textContent);
+        }
+      });
+    });
+
+    rangeInputs.forEach(input => {
+      input.addEventListener('input', function() {
+        const span = input.nextElementSibling;
+
+        span.textContent = input.value;
+      });
+    });*/
+
     const monthlyPropertyCharges = parseFloat(monthlyPropertyChargesInput.value);
     const initialSavings = parseFloat(initialSavingsInput.value);
     const monthlySavingsCapacity = parseFloat(monthlySavingsCapacityInput.value);
@@ -176,8 +236,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const realEstatePrice = parseFloat(realEstatePriceInput.value);
     const aquisitionCosts = parseFloat(aquisitionCostsInput.value);
     const deposit = parseFloat(depositSlider.value);
-    const loanRate = parseFloat(loanRateSlider.value) / 100;
-    const insuranceRate = parseFloat(insuranceRateSlider.value) / 100;
+    const loanRate = parseFloat(loanRateSlider.dataset.actualValue) / 100;
+    const insuranceRate = parseFloat(insuranceRateSlider.dataset.actualValue) / 100;
     const monthlyLoanDuration = parseFloat(loanDurationSlider.value) * 12;
     const loanDuration = parseFloat(loanDurationSlider.value);
 
@@ -247,19 +307,6 @@ function calculBorrowedCapital(realEstatePrice, aquisitionCosts, deposit) {
 
     return borrowedCapitalResult;
 }
-
-/*function calculMonthlyLoanPayment(borrowedCapitalAmount, loanDuration, loanRate, costOfInsuranceAmount) {
-    const monthlyLoadPaymentText = document.getElementById('monthly-loan-payment');
-
-    const monthlyLoanPaymentResult = Math.round(
-      ((borrowedCapitalAmount * loanDuration / 
-      (1 - Math.pow(1 + (loanRate / 12), -12 * loanDuration))) + 
-      (costOfInsuranceAmount / loanDuration)) / 12
-    );
-    monthlyLoadPaymentText.textContent = monthlyLoanPaymentResult.toLocaleString("fr-FR");
-
-    return monthlyLoanPaymentResult;
-}*/
 
 function calculMonthlyLoanPayment(borrowedCapitalAmount, loanDuration, loanRateSlider, costOfInsuranceAmount) {
   const monthlyLoadPaymentText = document.getElementById('monthly-loan-payment');
@@ -355,9 +402,14 @@ function calculAddtionalSavingsPlacedScenario1(monthlySavingsCapacity, monthlyPr
     );    
   } else {
     additionalSavingsPlacedResult = 12 * (monthlySavingsCapacity + monthlyPropertyCharges - monthlyLoanPaymentAmount - monthlyPropertyChargesRp - (annualPropertyTaxRp / 12)) * loanDuration;
-  }  
+  }
 
-  additionalSavingsPlacedText.textContent = Math.round(additionalSavingsPlacedResult).toLocaleString("fr-FR");
+  if (isNaN(additionalSavingsPlacedResult)) {
+    additionalSavingsPlacedText.textContent = 'O';
+    additionalSavingsPlacedResult = 0;
+  } else {
+    additionalSavingsPlacedText.textContent = Math.round(additionalSavingsPlacedResult).toLocaleString("fr-FR");
+  }
 
   return additionalSavingsPlacedResult;
 }
@@ -435,22 +487,6 @@ function calculTotalScenario2(monthlySavingsCapacity, loanDuration, netInvestmen
 
 // calcul scenario 3
 
-/*function calculAddtionalSavingsPlacedScenario3(monthlySavingsCapacity, monthlyLoanPaymentAmount, monthlyPropertyChargesOfRentedProperty, annualPropertyTaxOfRentedProperty, agencyFees, grossMonthlyRentReceived, taxBracket, loanDuration) {
-  const additionalSavingsPlacedText = document.getElementById('additional-savings-placed-3');
-
-  let additionalSavingsPlacedResult;
-
-  if (monthlySavingsCapacity - monthlyLoanPaymentAmount - monthlyPropertyChargesOfRentedProperty - (annualPropertyTaxOfRentedProperty / 12) - agencyFees + grossMonthlyRentReceived * (1 - 0.7 * (taxBracket + 0.172)) > 0) {
-    additionalSavingsPlacedResult = Math.round(12 * (monthlySavingsCapacity - monthlyLoanPaymentAmount - monthlyPropertyChargesOfRentedProperty - (annualPropertyTaxOfRentedProperty / 12) - agencyFees + grossMonthlyRentReceived * (1 - 0.7 * (taxBracket + 0.172))) * (((1 + netInvestmentSavingsRate) ^ loanDuration) - 1) / netInvestmentSavingsRate);
-  } else {
-    additionalSavingsPlacedResult = Math.round(12 * loanDuration * (monthlySavingsCapacity - monthlyLoanPaymentAmount - monthlyPropertyChargesOfRentedProperty - (annualPropertyTaxOfRentedProperty / 12) - agencyFees + grossMonthlyRentReceived * (1 - 0.7 * (taxBracket + 0.172))));
-  }  
-
-  additionalSavingsPlacedText.textContent = additionalSavingsPlacedResult.toLocaleString("fr-FR");
-
-  return additionalSavingsPlacedResult;
-}*/
-
 function calculAddtionalSavingsPlacedScenario3(
   monthlySavingsCapacity, 
   monthlyLoanPaymentAmount, 
@@ -472,6 +508,13 @@ function calculAddtionalSavingsPlacedScenario3(
     additionalSavingsPlacedResult = 12 * availableAmount * ((1 + netInvestmentSavingsRate) ** loanDuration - 1) / netInvestmentSavingsRate;
   } else {
     additionalSavingsPlacedResult = 12 * loanDuration * availableAmount;
+  }
+
+  if (isNaN(additionalSavingsPlacedResult)) {
+    additionalSavingsPlacedText.textContent = 'O';
+    additionalSavingsPlacedResult = 0;
+  } else {
+    additionalSavingsPlacedText.textContent = Math.round(additionalSavingsPlacedResult).toLocaleString("fr-FR");
   }
 
   additionalSavingsPlacedText.textContent = Math.round(additionalSavingsPlacedResult).toLocaleString("fr-FR");
@@ -517,9 +560,6 @@ function calculTotalScenario3(propertyValueAmount, monthlySavingsCapacity, month
   return totalResult;
 }
 
-
-
-
 function calculBestResult(propertyValueAmount, monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingsRate, loanDuration, remainingSavingsAmount, inflationRateCharges, initialSavings, monthlyPropertyChargesOfRentedProperty, annualPropertyTaxOfRentedProperty, agencyFees, grossMonthlyRentReceived, taxBracket, rentalIncomeRevaluationRate) {
   const resultWrapperScenario1 = document.getElementById('result-wrapper-1');
   const resultWrapperScenario2 = document.getElementById('result-wrapper-2');
@@ -553,6 +593,8 @@ function calculBestResult(propertyValueAmount, monthlySavingsCapacity, monthlyPr
     resultWrapperScenario3.classList.add('is-best-result');
     resultProfitableScenario3.classList.remove('hide');
   }
+
+  document.querySelector('.simulator_indication').classList.add('hide');
 }
 
 
