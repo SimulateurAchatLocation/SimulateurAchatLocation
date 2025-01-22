@@ -208,26 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   function updateCalculations() {
-    /*const rangeValues = document.querySelectorAll('.range-value');
-
-    rangeValues.forEach(span => {
-      span.addEventListener('input', function() {
-        const input = span.previousElementSibling;
-
-        if (!isNaN(parseFloat(span.textContent))) {
-          input.value = parseFloat(span.textContent);
-        }
-      });
-    });
-
-    rangeInputs.forEach(input => {
-      input.addEventListener('input', function() {
-        const span = input.nextElementSibling;
-
-        span.textContent = input.value;
-      });
-    });*/
-
     const monthlyPropertyCharges = parseFloat(monthlyPropertyChargesInput.value);
     const initialSavings = parseFloat(initialSavingsInput.value);
     const monthlySavingsCapacity = parseFloat(monthlySavingsCapacityInput.value);
@@ -235,24 +215,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const realEstatePrice = parseFloat(realEstatePriceInput.value);
     const aquisitionCosts = parseFloat(aquisitionCostsInput.value);
-    const deposit = parseFloat(depositSlider.value);
+    const deposit = parseFloat(depositSlider.dataset.actualValue);
     const loanRate = parseFloat(loanRateSlider.dataset.actualValue) / 100;
     const insuranceRate = parseFloat(insuranceRateSlider.dataset.actualValue) / 100;
-    const monthlyLoanDuration = parseFloat(loanDurationSlider.value) * 12;
-    const loanDuration = parseFloat(loanDurationSlider.value);
+    const monthlyLoanDuration = parseFloat(loanDurationSlider.dataset.actualValue) * 12;
+    const loanDuration = parseFloat(loanDurationSlider.dataset.actualValue);
 
     const netInvestmentSavingsRate = parseFloat(netInvestmentSavingqRateSlider.dataset.actualValue) / 100;
     const rateOfChange = parseFloat(rateOfChangeSlider.dataset.actualValue) / 100;
     const rentalIncomeRevaluationRate = parseFloat(rentalIncomeRevaluationRateSlider.dataset.actualValue) / 100;
     const inflationRateCharges = parseFloat(inflationRateChargesSlider.dataset.actualValue) / 100;
 
-    const monthlyPropertyChargesRp = parseFloat(monthlyPropertyChargesRpSlider.value);
-    const annualPropertyTaxRp = parseFloat(annualPropertyTaxRpSlider.value);
+    const monthlyPropertyChargesRp = parseFloat(monthlyPropertyChargesRpSlider.dataset.actualValue);
+    const annualPropertyTaxRp = parseFloat(annualPropertyTaxRpSlider.dataset.actualValue);
 
-    const grossMonthlyRentReceived = parseFloat(grossMonthlyRentReceivedSlider.value);
-    const agencyFees = parseFloat(agencyFeesSlider.value);
-    const annualPropertyTaxOfRentedProperty = parseFloat(annualPropertyTaxOfRentedPropertySlider.value);
-    const monthlyPropertyChargesOfRentedProperty = parseFloat(monthlyPropertyChargesOfRentedPropertySlider.value);
+    const grossMonthlyRentReceived = parseFloat(grossMonthlyRentReceivedSlider.dataset.actualValue);
+    const agencyFees = parseFloat(agencyFeesSlider.dataset.actualValue);
+    const annualPropertyTaxOfRentedProperty = parseFloat(annualPropertyTaxOfRentedPropertySlider.dataset.actualValue);
+    const monthlyPropertyChargesOfRentedProperty = parseFloat(monthlyPropertyChargesOfRentedPropertySlider.dataset.actualValue);
 
     document.getElementById('loan-duration-result').textContent = loanDuration;
 
