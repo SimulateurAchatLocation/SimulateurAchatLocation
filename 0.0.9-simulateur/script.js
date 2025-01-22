@@ -574,7 +574,9 @@ function calculBestResult(propertyValueAmount, monthlySavingsCapacity, monthlyPr
     resultProfitableScenario3.classList.remove('hide');
   }
 
-  document.querySelector('.simulator_indication').classList.add('hide');
+  document.querySelectorAll('.simulator_indication').forEach((element) => {
+    element.classList.add('hide');
+  });
 }
 
 
