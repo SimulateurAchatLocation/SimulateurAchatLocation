@@ -106,6 +106,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById('monthly-loan-payment').textContent = 'O';
+  document.getElementById('loan-cost').textContent = 'O';
+  document.getElementById('cost-of-insurance').textContent = 'O';
+  document.getElementById('remaining-savings').textContent = 'O';
+  document.getElementById('borrowed-capital').textContent = 'O';
+
   const monthlyPropertyChargesInput = document.getElementById('monthly-property-charges');
   const initialSavingsInput = document.getElementById('initial-savings');
   const monthlySavingsCapacityInput = document.getElementById('monthly-savings-capacity');
