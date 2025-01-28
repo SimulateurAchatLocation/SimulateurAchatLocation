@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const borrowedCapitalAmount = calculBorrowedCapital(realEstatePrice, acquisitionCosts, deposit);
 
     if (isNaN(borrowedCapitalAmount)) {
-      document.getElementById('borrowed-capital').textContent = 'O';
+      document.getElementById('borrowed-capital').textContent = '0';
     }
   };
 
@@ -106,11 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById('monthly-loan-payment').textContent = 'O';
-  document.getElementById('loan-cost').textContent = 'O';
-  document.getElementById('cost-of-insurance').textContent = 'O';
-  document.getElementById('remaining-savings').textContent = 'O';
-  document.getElementById('borrowed-capital').textContent = 'O';
+  document.getElementById('monthly-loan-payment').textContent = '0';
+  document.getElementById('loan-cost').textContent = '0';
+  document.getElementById('cost-of-insurance').textContent = '0';
+  document.getElementById('remaining-savings').textContent = '0';
+  document.getElementById('borrowed-capital').textContent = '0';
 
   const monthlyPropertyChargesInput = document.getElementById('monthly-property-charges');
   const initialSavingsInput = document.getElementById('initial-savings');
@@ -243,8 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('loan-duration-result').textContent = loanDuration;
 
     if (!areRequiredFieldsFilled(monthlyPropertyCharges, initialSavings, monthlySavingsCapacity, realEstatePrice, aquisitionCosts)) {
-      document.getElementById('borrowed-capital').innerHTML = 'O';
-      console.log("Veuillez remplir tous les champs requis avant de lancer les calculs.");
+      document.getElementById('borrowed-capital').innerHTML = '0';
       return;
     }
 
@@ -284,6 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function calculOnInputEventListener(input, calculFunction) {
     input.addEventListener('input', calculFunction);
 }
+
 
 function calculBorrowedCapital(realEstatePrice, aquisitionCosts, deposit) {
     const borrowedCapitalText = document.getElementById('borrowed-capital');
@@ -365,6 +365,10 @@ function calculInitialSavingsPlaced(remainingSavingsAmount, netInvestmentSavings
 function calculAdditionalCostOfInflationRentalCharges(monthlyPropertyCharges, loanDuration, inflationRateCharges) {
   const additionalCostOfInflationRentalChargesText = document.querySelectorAll('.additional-cost-of-inflation-rental-charges');
 
+  if (inflationRateCharges === 0) {
+    inflationRateCharges = 1e-9;
+  }
+
   const additionalCostOfInflationRentalChargesResult = 12 * monthlyPropertyCharges * (loanDuration - ((1 + inflationRateCharges) ** loanDuration - 1) / inflationRateCharges);
 
   additionalCostOfInflationRentalChargesText.forEach((text) => {
@@ -404,10 +408,12 @@ function calculAddtionalSavingsPlacedScenario1(monthlySavingsCapacity, monthlyPr
 function calculAdditionalCostOfInflationRpCharges(monthlyPropertyChargesRp, annualPropertyTaxRp, loanDuration, inflationRateCharges) {
   const additionalCostOfInflationRpChargesText = document.getElementById('additional-cost-of-inflation-rp-charges');
 
+  if (inflationRateCharges === 0) {
+    inflationRateCharges = 1e-9;
+  }
+
   const charges = 12 * monthlyPropertyChargesRp + annualPropertyTaxRp;
   const inflationFactor = ((1 + inflationRateCharges) ** loanDuration - 1) / inflationRateCharges;
-
-  // const additionalCostOfInflationRpChargesResult = Math.round(charges * inflationFactor);
 
   const additionalCostOfInflationRpChargesResult = (loanDuration - inflationFactor) * charges;
 
@@ -418,6 +424,10 @@ function calculAdditionalCostOfInflationRpCharges(monthlyPropertyChargesRp, annu
 
 function calculTotalScenario1(propertyValueAmount, monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingsRate, loanDuration, remainingSavingsAmount, inflationRateCharges) {
   const totalText = document.getElementById('total-scenario-1');
+
+  if (inflationRateCharges === 0) {
+    inflationRateCharges = 1e-9;
+  }
 
   const additionalSavingsPlaced = calculAddtionalSavingsPlacedScenario1(monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingsRate, loanDuration);
 
@@ -438,6 +448,10 @@ function calculTotalScenario1(propertyValueAmount, monthlySavingsCapacity, month
 function calculAdditionalSavingsPlacedScenario2(monthlySavingsCapacity, loanDuration, netInvestmentSavingsRate) {
   const additionalSavingsPlacedText = document.getElementById('additional-savings-placed-2');
 
+  if (netInvestmentSavingsRate === 0) {
+    netInvestmentSavingsRate = 1e-9;
+  }
+
   const additionalSavingsPlacedResult = (12 * monthlySavingsCapacity * ((1 + netInvestmentSavingsRate) ** loanDuration - 1)) / netInvestmentSavingsRate;
 
   additionalSavingsPlacedText.textContent = Math.round(additionalSavingsPlacedResult).toLocaleString("fr-FR");
@@ -456,6 +470,10 @@ function calculInitialSavingsPlacedScenario2(initialSavings, netInvestmentSaving
 
 function calculTotalScenario2(monthlySavingsCapacity, loanDuration, netInvestmentSavingsRate, initialSavings, monthlyPropertyCharges, inflationRateCharges) {
   const totalText = document.getElementById('total-scenario-2');
+
+  if (inflationRateCharges === 0) {
+    inflationRateCharges = 1e-9;
+  }
 
   const additionalSavingsPlaced = calculAdditionalSavingsPlacedScenario2(monthlySavingsCapacity, loanDuration, netInvestmentSavingsRate);
 
@@ -508,9 +526,12 @@ function calculAddtionalSavingsPlacedScenario3(
   return additionalSavingsPlacedResult;
 }
 
-
 function calculRevaluationOfRentalIncome(grossMonthlyRentReceived, taxBracket, rentalIncomeRevaluationRate, loanDuration) {
   const revaluationOfRentalIncomeText = document.getElementById('revaluation-of-rental-income');
+
+  if (rentalIncomeRevaluationRate === 0) {
+    rentalIncomeRevaluationRate = 1e-9;
+  }
 
   const revaluationOfRentalIncomeResult = 12 * grossMonthlyRentReceived * (1 - 0.7 * (taxBracket + 0.172)) * (((((1 + rentalIncomeRevaluationRate) ** loanDuration) - 1) / rentalIncomeRevaluationRate) - loanDuration);
   revaluationOfRentalIncomeText.textContent = Math.round(revaluationOfRentalIncomeResult).toLocaleString("fr-FR");
@@ -521,6 +542,10 @@ function calculRevaluationOfRentalIncome(grossMonthlyRentReceived, taxBracket, r
 function calculAdditionalCostInflationChargesOfTheRentedProperty(annualPropertyTaxOfRentedProperty, monthlyPropertyChargesOfRentedProperty, loanDuration, inflationRateCharges) {
   const additionalCostInflationChargesOfTheRentedPropertyText = document.getElementById('additional-cost-inflation-charges-of-the-rented-property');
 
+  if (inflationRateCharges === 0) {
+    inflationRateCharges = 1e-9;
+  }
+
   const additionalCostInflationChargesOfTheRentedPropertyResult = (annualPropertyTaxOfRentedProperty + 12 * monthlyPropertyChargesOfRentedProperty) * (loanDuration - ((((1 + inflationRateCharges) ** loanDuration) - 1) / inflationRateCharges));
   additionalCostInflationChargesOfTheRentedPropertyText.textContent = Math.round(additionalCostInflationChargesOfTheRentedPropertyResult).toLocaleString("fr-FR");
 
@@ -529,6 +554,14 @@ function calculAdditionalCostInflationChargesOfTheRentedProperty(annualPropertyT
 
 function calculTotalScenario3(propertyValueAmount, monthlySavingsCapacity, monthlyLoanPaymentAmount, monthlyPropertyChargesOfRentedProperty, annualPropertyTaxOfRentedProperty, agencyFees, grossMonthlyRentReceived, taxBracket, loanDuration, netInvestmentSavingsRate, remainingSavingsAmount, monthlyPropertyCharges, inflationRateCharges, rentalIncomeRevaluationRate) {
   const totalText = document.getElementById('total-scenario-3');
+
+  if (inflationRateCharges === 0) {
+    inflationRateCharges = 1e-9;
+  }
+
+  if (rentalIncomeRevaluationRate === 0) {
+    rentalIncomeRevaluationRate = 1e-9;
+  }
 
   const additionalSavingsPlaced = calculAddtionalSavingsPlacedScenario3(monthlySavingsCapacity,monthlyLoanPaymentAmount, monthlyPropertyChargesOfRentedProperty, annualPropertyTaxOfRentedProperty, agencyFees, grossMonthlyRentReceived, taxBracket, loanDuration, netInvestmentSavingsRate);
 
@@ -563,6 +596,14 @@ function calculBestResult(propertyValueAmount, monthlySavingsCapacity, monthlyPr
   resultProfitableScenario2.classList.add('hide');
   resultProfitableScenario3.classList.add('hide');
 
+  if (inflationRateCharges === 0) {
+    inflationRateCharges = 1e-9;
+  }
+
+  if (rentalIncomeRevaluationRate === 0) {
+    rentalIncomeRevaluationRate = 1e-9;
+  }
+
   const totalResultScenario1 = calculTotalScenario1(propertyValueAmount, monthlySavingsCapacity, monthlyPropertyCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, netInvestmentSavingsRate, loanDuration, remainingSavingsAmount, inflationRateCharges);
 
   const totalResultScenario2 = calculTotalScenario2(monthlySavingsCapacity, loanDuration, netInvestmentSavingsRate, initialSavings, monthlyPropertyCharges, inflationRateCharges);
@@ -587,6 +628,14 @@ function calculBestResult(propertyValueAmount, monthlySavingsCapacity, monthlyPr
 
 
 function showAttentionPicto(remainingSavingsAmount, propertyValueAmount, monthlySavingsCapacity, loanDuration, netInvestmentSavingsRate, initialSavings, monthlyPropertyCharges, inflationRateCharges, monthlyLoanPaymentAmount, monthlyPropertyChargesRp, annualPropertyTaxRp, monthlyPropertyChargesOfRentedProperty, annualPropertyTaxOfRentedProperty, agencyFees, grossMonthlyRentReceived, taxBracket, rentalIncomeRevaluationRate) {
+  if (inflationRateCharges === 0) {
+    inflationRateCharges = 1e-9;
+  }
+
+  if (rentalIncomeRevaluationRate === 0) {
+    rentalIncomeRevaluationRate = 1e-9;
+  }
+
   const totalResultScenario2 = calculTotalScenario2(monthlySavingsCapacity, loanDuration, netInvestmentSavingsRate, initialSavings, monthlyPropertyCharges, inflationRateCharges);
 
   const notEnoughMoney2 = document.getElementById('not-enough-money-2');
