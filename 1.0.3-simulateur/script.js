@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const netInvestmentSavingqRateSlider = document.getElementById('net-investment-savings-rate');
   const rateOfChangeSlider = document.getElementById('rate-of-change');
-  const rentalIncomeRevaluationRateSlider = document.getElementById('rental-income-revaluation-rate');
+  const rentalIncomeRevaluationRateSlider = document.getElementById('rental-income-revaluation-rate-test');
   const inflationRateChargesSlider = document.getElementById('inflation-rate-charges');
 
   const monthlyPropertyChargesRpSlider = document.getElementById('monthly-property-charges-rp');
@@ -284,7 +284,6 @@ function calculOnInputEventListener(input, calculFunction) {
     input.addEventListener('input', calculFunction);
 }
 
-
 function calculBorrowedCapital(realEstatePrice, aquisitionCosts, deposit) {
     const borrowedCapitalText = document.getElementById('borrowed-capital');
 
@@ -394,6 +393,10 @@ function calculAddtionalSavingsPlacedScenario1(monthlySavingsCapacity, monthlyPr
 
   let additionalSavingsPlacedResult;
 
+  if (netInvestmentSavingsRate === 0) {
+    netInvestmentSavingsRate = 1e-9;
+  }
+
   if ((monthlySavingsCapacity + monthlyPropertyCharges - monthlyLoanPaymentAmount - monthlyPropertyChargesRp - (annualPropertyTaxRp / 12)) > 0) {
     additionalSavingsPlacedResult = 12 * (monthlySavingsCapacity + monthlyPropertyCharges - monthlyLoanPaymentAmount - monthlyPropertyChargesRp - (annualPropertyTaxRp / 12)) * (
       ((1 + netInvestmentSavingsRate) ** loanDuration - 1) / netInvestmentSavingsRate
@@ -499,20 +502,14 @@ function calculTotalScenario2(monthlySavingsCapacity, loanDuration, netInvestmen
 
 // calcul scenario 3
 
-function calculAddtionalSavingsPlacedScenario3(
-  monthlySavingsCapacity, 
-  monthlyLoanPaymentAmount, 
-  monthlyPropertyChargesOfRentedProperty, 
-  annualPropertyTaxOfRentedProperty, 
-  agencyFees, 
-  grossMonthlyRentReceived, 
-  taxBracket, 
-  loanDuration, 
-  netInvestmentSavingsRate
-) {
+function calculAddtionalSavingsPlacedScenario3(monthlySavingsCapacity, monthlyLoanPaymentAmount, monthlyPropertyChargesOfRentedProperty, annualPropertyTaxOfRentedProperty, agencyFees, grossMonthlyRentReceived, taxBracket, loanDuration, netInvestmentSavingsRate) {
   const additionalSavingsPlacedText = document.getElementById('additional-savings-placed-3');
 
   let additionalSavingsPlacedResult;
+
+  if (netInvestmentSavingsRate === 0) {
+    netInvestmentSavingsRate = 1e-9;
+  }
 
   const availableAmount = monthlySavingsCapacity - monthlyLoanPaymentAmount - monthlyPropertyChargesOfRentedProperty - (annualPropertyTaxOfRentedProperty / 12) - agencyFees + grossMonthlyRentReceived * (1 - 0.7 * (taxBracket + 0.172));
 
