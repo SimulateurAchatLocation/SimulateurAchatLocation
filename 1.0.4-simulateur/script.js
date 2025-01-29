@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const netInvestmentSavingqRateSlider = document.getElementById('net-investment-savings-rate');
   const rateOfChangeSlider = document.getElementById('rate-of-change');
-  const rentalIncomeRevaluationRateSlider = document.getElementById('rental-income-revaluation-rate-test');
+  const rentalIncomeRevaluationRateSlider = document.getElementById('rental-income-revaluation-rate');
   const inflationRateChargesSlider = document.getElementById('inflation-rate-charges');
 
   const monthlyPropertyChargesRpSlider = document.getElementById('monthly-property-charges-rp');
