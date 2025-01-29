@@ -297,7 +297,10 @@ function calculBorrowedCapital(realEstatePrice, aquisitionCosts, deposit) {
 function calculMonthlyLoanPayment(borrowedCapitalAmount, loanDuration, loanRateSlider, costOfInsuranceAmount) {
   const monthlyLoadPaymentText = document.getElementById('monthly-loan-payment');
 
-  const annualLoanRate = parseFloat(loanRateSlider.dataset.actualValue);
+  let annualLoanRate = parseFloat(loanRateSlider.dataset.actualValue);
+  if (annualLoanRate === 0) {
+    annualLoanRate = 1e-9;
+  }
   const monthlyLoanRate = annualLoanRate / 12 / 100;
   const totalMonths = loanDuration * 12;
 
@@ -324,7 +327,12 @@ function calculLoanCost(loanDuration, borrowedCapitalAmount, costOfInsuranceAmou
     const loanCostText = document.getElementById('loan-cost');
 
     const loanCostResult = 12 * loanDuration * monthlyLoanPaymentAmount - borrowedCapitalAmount - costOfInsuranceAmount;
-    loanCostText.textContent = Math.round(loanCostResult).toLocaleString("fr-FR");
+    
+    if (Math.round(loanCostResult) === -0) {
+      loanCostText.textContent = '0';
+    } else {
+      loanCostText.textContent = Math.round(loanCostResult).toLocaleString("fr-FR");
+    }
 
     return loanCostResult;
 }
