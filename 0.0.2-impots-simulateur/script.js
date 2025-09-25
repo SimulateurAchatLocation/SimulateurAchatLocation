@@ -680,30 +680,30 @@ function runTaxSimulationTwo() {
   const getValue = id => parseFloat(document.getElementById(id)?.value || '0');
   const getActualValue = id => parseFloat(document.getElementById(id)?.dataset.actualValue || '0');
 
-  const R1 = getActualValue('net-income-1');
-  const RF1 = getActualValue('rental-income-1');
-  const F1 = getValue('actual-expenses-number-1');
-  const D1 = getValue('income-deduction-1');
-  const Red1 = getValue('tax-reduction-1');
-  const C1 = getValue('tax-credit-1');
-  const A1 = isChecked('standard-deduction-1');
-  const Ret1 = isChecked('retirement-1');
-  const FR1 = isChecked('actual-expenses-checkbox-1');
+  const revenu1 = getActualValue('net-income-1');
+  const revenuF1 = getActualValue('rental-income-1');
+  const fraisR1 = getValue('actual-expenses-number-1');
+  const deduction1 = getValue('income-deduction-1');
+  const reduc1 = getValue('tax-reduction-1');
+  const credit1 = getValue('tax-credit-1');
+  const abattement1 = isChecked('standard-deduction-1');
+  const retraite1 = isChecked('retirement-1');
+  const fraisRCoche1 = isChecked('actual-expenses-checkbox-1');
   const Plus651 = isChecked('over-65-1');
-  const CI1 = isChecked('disabled-1') ? 0.5 : 0;
+  const caseInvalide1 = isChecked('disabled-1') ? 0.5 : 0;
 
   // Récupération des données déclarant 2
-  const R2 = getActualValue('net-income-2');
-  const RF2 = getActualValue('rental-income-2');
-  const F2 = getValue('actual-expenses-number-2');
-  const D2 = getValue('income-deduction-2');
-  const Red2 = getValue('tax-reduction-2');
-  const C2 = getValue('tax-credit-2');
-  const A2 = isChecked('standard-deduction-2');
-  const Ret2 = isChecked('retirement-2');
-  const FR2 = isChecked('actual-expenses-checkbox-2');
+  const revenu2 = getActualValue('net-income-2');
+  const revenuF2 = getActualValue('rental-income-2');
+  const fraisR2 = getValue('actual-expenses-number-2');
+  const deduction2 = getValue('income-deduction-2');
+  const reduc2 = getValue('tax-reduction-2');
+  const credit2 = getValue('tax-credit-2');
+  const abattement2 = isChecked('standard-deduction-2');
+  const retraite2 = isChecked('retirement-2');
+  const fraisRCoche2 = isChecked('actual-expenses-checkbox-2');
   const Plus652 = isChecked('over-65-2');
-  const CI2 = isChecked('disabled-2') ? 0.5 : 0;
+  const caseInvalide2 = isChecked('disabled-2') ? 0.5 : 0;
 
   // Personnes à charge
   const EnfantE = getActualValue('children-full-custody');
@@ -714,32 +714,32 @@ function runTaxSimulationTwo() {
   const PI = isChecked('single-parent') ? 1 : 0;
 
   // RevenuSR
-  let RS1 = R1;
-  let RS2 = R2;
+  let RS1 = revenu1;
+  let RS2 = revenu2;
 
-  if (FR1) RS1 = R1 - F1;
-  else if (A1 && Ret1) RS1 = R1 * 0.1 <= 450 ? R1 - 450 : Math.max(R1 * 0.9, R1 - 4399);
-  else if (A1 && !Ret1) RS1 = R1 * 0.1 <= 504 ? R1 - 504 : Math.max(R1 * 0.9, R1 - 14426);
+  if (fraisRCoche1) RS1 = revenu1 - fraisR1;
+  else if (abattement1 && retraite1) RS1 = revenu1 * 0.1 <= 450 ? revenu1 - 450 : Math.max(revenu1 * 0.9, revenu1 - 4399);
+  else if (abattement1 && !retraite1) RS1 = revenu1 * 0.1 <= 504 ? revenu1 - 504 : Math.max(revenu1 * 0.9, revenu1 - 14426);
 
-  if (FR2) RS2 = R2 - F2;
-  else if (A2 && Ret2) RS2 = R2 * 0.1 <= 450 ? R2 - 450 : Math.max(R2 * 0.9, R2 - 4399);
-  else if (A2 && !Ret2) RS2 = R2 * 0.1 <= 504 ? R2 - 504 : Math.max(R2 * 0.9, R2 - 14426);
+  if (fraisRCoche2) RS2 = revenu2 - fraisR2;
+  else if (abattement2 && retraite2) RS2 = revenu2 * 0.1 <= 450 ? revenu2 - 450 : Math.max(revenu2 * 0.9, revenu2 - 4399);
+  else if (abattement2 && !retraite2) RS2 = revenu2 * 0.1 <= 504 ? revenu2 - 504 : Math.max(revenu2 * 0.9, revenu2 - 14426);
 
   // Revenu net global
-  let RNet1 = RS1 + RF1 - D1;
-  let RNet2 = RS2 + RF2 - D2;
-  let RNet;
+  let revenuNet1 = RS1 + revenuF1 - deduction1;
+  let revenuNet2 = RS2 + revenuF2 - deduction2;
+  let revenuNetGlobal;
 
-  /*if ((Ret1 && Ret2 && R1 < 450 && R2 < 450) || ((R1 + R2) * 0.1 < 4399 && Ret1 && Ret2)) {
-    RNet = R1 + R2 - 4399;
+  /*if ((retraite1 && retraite2 && revenu1 < 450 && revenu2 < 450) || ((revenu1 + revenu2) * 0.1 < 4399 && retraite1 && retraite2)) {
+    revenuNetGlobal = revenu1 + revenu2 - 4399;
   } else {
-    RNet = RNet1 + RNet2;
+    revenuNetGlobal = revenuNet1 + revenuNet2;
   }*/
 
-  if ((Ret1 && Ret2 && R1 < 450 && (450 + R2 * 0.1) > 4399) || (Ret1 && Ret2 && R2 < 4500 && (450 + R1 * 0.1) > 4399)) {
-    RNet = R1 + R2 - 4399;
+  if ((retraite1 && retraite2 && revenu1 < 450 && (450 + revenu2 * 0.1) > 4399) || (retraite1 && retraite2 && revenu2 < 4500 && (450 + revenu1 * 0.1) > 4399)) {
+    revenuNetGlobal = revenu1 + revenu2 - 4399;
   } else {
-    RNet = RNet1 + RNet2;
+    revenuNetGlobal = revenuNet1 + revenuNet2;
   }
 
   // AbattementS
@@ -751,46 +751,46 @@ function runTaxSimulationTwo() {
     return 0;
   }
 
-  const Ab1 = getAbattement(RNet1, Plus651, CI1);
-  const Ab2 = getAbattement(RNet2, Plus652, CI2);
+  const Ab1 = getAbattement(revenuNet1, Plus651, caseInvalide1);
+  const Ab2 = getAbattement(revenuNet2, Plus652, caseInvalide2);
 
   const AbT = Ab1 + Ab2;
 
-  function getAbattementTotal(RNet, plus65_1, plus65_2, ci_1, ci_2) {
+  function getAbattementTotal(revenuNetGlobal, plus65_1, plus65_2, ci_1, ci_2) {
     const eligible1 = plus65_1 || ci_1;
     const eligible2 = plus65_2 || ci_2;
 
     if (eligible1 && eligible2) {
-      if (RNet <= 17510) return 2 * 2769;
-      if (RNet <= 28170 && RNet > 17510) return 2 * 1398;
+      if (revenuNetGlobal <= 17510) return 2 * 2769;
+      if (revenuNetGlobal <= 28170 && revenuNetGlobal > 17510) return 2 * 1398;
       return 0;
     }
 
     if (eligible1 || eligible2) {
-      if (RNet <= 17510) return 2769;
-      if (RNet <= 28170 && RNet > 17510) return 1398;
+      if (revenuNetGlobal <= 17510) return 2769;
+      if (revenuNetGlobal <= 28170 && revenuNetGlobal > 17510) return 1398;
       return 0;
     }
 
     return 0;
   }
 
-  const AbTotal = getAbattementTotal(RNet, Plus651, Plus652, CI1, CI2);
+  const AbTotal = getAbattementTotal(revenuNetGlobal, Plus651, Plus652, caseInvalide1, caseInvalide2);
 
 
   // Rimposable
-  const Rimpo1 = Math.max(RNet1 - Ab1, 0);
-  const Rimpo2 = Math.max(RNet2 - Ab2, 0);
-  const Rimpo = Math.max(RNet - AbTotal, 0);
+  const Rimpo1 = Math.max(revenuNet1 - Ab1, 0);
+  const Rimpo2 = Math.max(revenuNet2 - Ab2, 0);
+  const Rimpo = Math.max(revenuNetGlobal - AbTotal, 0);
 
   // RFR
-  const RFR1 = Math.max(RS1 + RF1 - Ab1, 0);
-  const RFR2 = Math.max(RS2 + RF2 - Ab2, 0);
-  const RFR = Math.max(RNet1 + RNet2 + D1 + D2 - AbTotal, 0);
+  const RFR1 = Math.max(RS1 + revenuF1 - Ab1, 0);
+  const RFR2 = Math.max(RS2 + revenuF2 - Ab2, 0);
+  const RFR = Math.max(revenuNet1 + revenuNet2 + deduction1 + deduction2 - AbTotal, 0);
 
   // Parts fiscales
-  // let Parts = 1 + CI1 + CI2;
-  let Parts = CI1 + CI2;
+  // let Parts = 1 + caseInvalide1 + caseInvalide2;
+  let Parts = caseInvalide1 + caseInvalide2;
 
   const totalEnfants = EnfantE + Invalide;
 
@@ -812,12 +812,12 @@ function runTaxSimulationTwo() {
 
   const Quotient = Rimpo / Parts;
   const ImpInter = calculateTax(Quotient) * Parts;
-  /*const quotient1 = Rimpo1 / ((Parts - CI1 + CI2) * 0.5);
-  const quotient2 = Rimpo2 / ((Parts - CI2 + CI1) * 0.5);
-  const ImpInter1 = calculateTax(quotient1) * ((Parts - CI1 + CI2) * 0.5);
-  const ImpInter2 = calculateTax(quotient2) * ((Parts - CI2 + CI1) * 0.5);*/
-  const partsWithoutCI2 = Parts - CI2 + CI1;
-  const partsWithoutCI1 = Parts - CI1 + CI2;
+  /*const quotient1 = Rimpo1 / ((Parts - caseInvalide1 + caseInvalide2) * 0.5);
+  const quotient2 = Rimpo2 / ((Parts - caseInvalide2 + caseInvalide1) * 0.5);
+  const ImpInter1 = calculateTax(quotient1) * ((Parts - caseInvalide1 + caseInvalide2) * 0.5);
+  const ImpInter2 = calculateTax(quotient2) * ((Parts - caseInvalide2 + caseInvalide1) * 0.5);*/
+  const partsWithoutCI2 = Parts - caseInvalide2 + caseInvalide1;
+  const partsWithoutCI1 = Parts - caseInvalide1 + caseInvalide2;
 
   const Rimposable1ParPart = Rimpo1 / (partsWithoutCI2 * 0.5);
   const Rimposable2ParPart = Rimpo2 / (partsWithoutCI1 * 0.5);
@@ -828,21 +828,21 @@ function runTaxSimulationTwo() {
   // Plafonnement
   const ImpBrut = calculateTax(Rimpo);
   const Plaf = Math.min(
-    2 * 1791 * (Parts - 2) + (2 * (CI1 + CI2) + EnfantEH + EnfantA / 2 + Invalide) * 1785,
+    2 * 1791 * (Parts - 2) + (2 * (caseInvalide1 + caseInvalide2) + EnfantEH + EnfantA / 2 + Invalide) * 1785,
     ImpBrut - ImpInter
   );
 
   // Plafonnement 1
-  const Plaf1Base = 2 * 1791 * ((Parts - CI2 + CI1) * 0.5 - 1);
-  const Plaf1Supp = (4 * CI1 + EnfantEH + EnfantAH / 2 + Invalide) * 1785 / 2;
+  const Plaf1Base = 2 * 1791 * ((Parts - caseInvalide2 + caseInvalide1) * 0.5 - 1);
+  const Plaf1Supp = (4 * caseInvalide1 + EnfantEH + EnfantAH / 2 + Invalide) * 1785 / 2;
   const Plaf1 = Math.min(
     Plaf1Base + Plaf1Supp,
     calculateTax(Rimpo1) - ImpotIntermediaire1
   );
 
   // Plafonnement 2
-  const Plaf2Base = 2 * 1791 * ((Parts - CI1 + CI2) * 0.5 - 1);
-  const Plaf2Supp = (4 * CI2 + EnfantEH + EnfantAH / 2 + Invalide) * 1785 / 2;
+  const Plaf2Base = 2 * 1791 * ((Parts - caseInvalide1 + caseInvalide2) * 0.5 - 1);
+  const Plaf2Supp = (4 * caseInvalide2 + EnfantEH + EnfantAH / 2 + Invalide) * 1785 / 2;
   const Plaf2 = Math.min(
     Plaf2Base + Plaf2Supp,
     calculateTax(Rimpo2) - ImpotIntermediaire2
@@ -867,9 +867,9 @@ function runTaxSimulationTwo() {
 
 
   // Réduction min
-  const RedMin1 = -Math.min(ImpPlaf1 + Decote1, Red1);
-  const RedMin2 = -Math.min(ImpPlaf2 + Decote2, Red2);
-  const RedMin = -Math.min(ImpPlaf + Decote, Red1 + Red2);
+  const RedMin1 = -Math.min(ImpPlaf1 + Decote1, reduc1);
+  const RedMin2 = -Math.min(ImpPlaf2 + Decote2, reduc2);
+  const RedMin = -Math.min(ImpPlaf + Decote, reduc1 + reduc2);
 
   // Hauts revenus
   let HR = 0;
@@ -877,40 +877,40 @@ function runTaxSimulationTwo() {
   else if (RFR >= 1000001) HR = (RFR - 1000001) * 0.04 + 15000;
 
   // Prélèvements sociaux
-  const PF1 = RF1 * 0.172;
-  const PF2 = RF2 * 0.172;
+  const PF1 = revenuF1 * 0.172;
+  const PF2 = revenuF2 * 0.172;
   const PF = PF1 + PF2;
 
   // Impôt final
-  // const Impot = Math.ceil(ImpPlaf + Decote + RedMin - C1 - C2 + HR + PF);
+  // const Impot = Math.ceil(ImpPlaf + Decote + RedMin - credit1 - credit2 + HR + PF);
   const Impot = Math.max(
     0,
-    Math.ceil(ImpPlaf + Decote + RedMin - C1 - C2 + HR + PF)
+    Math.ceil(ImpPlaf + Decote + RedMin - credit1 - credit2 + HR + PF)
   );
 
-  const Taux = R1 + R2 > 0 ? Math.max((Impot / (R1 + R2)) * 100, 0).toFixed(1) : '0';
+  const Taux = revenu1 + revenu2 > 0 ? Math.max((Impot / (revenu1 + revenu2)) * 100, 0).toFixed(1) : '0';
 
   // Répartition entre déclarants
-  // const Imp1 = Math.ceil((Impot * R1) / (R1 + R2));
+  // const Imp1 = Math.ceil((Impot * revenu1) / (revenu1 + revenu2));
   // const Imp2 = Impot - Imp1;
   const ImpotInter1 = Math.max(
     0,
-    Math.ceil(ImpPlaf1 + Decote1 + RedMin1 - C1 + HR * (R1 / (R1 + R2)) + PF1)
+    Math.ceil(ImpPlaf1 + Decote1 + RedMin1 - credit1 + HR * (revenu1 / (revenu1 + revenu2)) + PF1)
   );
   const ImpotInter2 = Math.max(
     0,
-    Math.ceil(ImpPlaf2 + Decote2 + RedMin2 - C2 + HR * (R2 / (R1 + R2)) + PF2)
+    Math.ceil(ImpPlaf2 + Decote2 + RedMin2 - credit2 + HR * (revenu2 / (revenu1 + revenu2)) + PF2)
   );
 
 
   // Calcul de la répartition de l’impôt entre chaque déclarant
-  // const TauxI1 = R1 > 0 ? (ImpotInter1 / (ImpotInter1 + ImpotInter2)) * 100 : 0;
-  // const TauxI2 = R2 > 0 ? (ImpotInter2 / (ImpotInter1 + ImpotInter2)) * 100 : 0;
-  const TauxI1 = R1 > 0 ? (ImpotInter1 / (ImpotInter1 + ImpotInter2)) : 0;
-  const TauxI2 = R2 > 0 ? (ImpotInter2 / (ImpotInter1 + ImpotInter2)) : 0;
+  // const TauxI1 = revenu1 > 0 ? (ImpotInter1 / (ImpotInter1 + ImpotInter2)) * 100 : 0;
+  // const TauxI2 = revenu2 > 0 ? (ImpotInter2 / (ImpotInter1 + ImpotInter2)) * 100 : 0;
+  const TauxI1 = revenu1 > 0 ? (ImpotInter1 / (ImpotInter1 + ImpotInter2)) : 0;
+  const TauxI2 = revenu2 > 0 ? (ImpotInter2 / (ImpotInter1 + ImpotInter2)) : 0;
 
-  // const Taux1 = R1 > 0 ? (Imp1 / R1) * 100 : 0;
-  // const Taux2 = R2 > 0 ? (Imp2 / R2) * 100 : 0;
+  // const Taux1 = revenu1 > 0 ? (Imp1 / revenu1) * 100 : 0;
+  // const Taux2 = revenu2 > 0 ? (Imp2 / revenu2) * 100 : 0;
 
   // Calcul final de l’impôt de chaque déclarant
   // const Impot1 = Math.max(0, Math.ceil(Impot * TauxI1));
@@ -920,15 +920,15 @@ function runTaxSimulationTwo() {
   const Impot2 = Math.max(0, Math.ceil(Impot * TauxI2));
 
   // Calcul du taux d’imposition de chaque déclarant
-  // const Taux1 = Impot1 / R1;
-  // const Taux2 = Impot2 / R2;
-  const Taux1 = R1 > 0 ? Impot1 / R1 : 0;
-  const Taux2 = R2 > 0 ? Impot2 / R2 : 0;
+  // const Taux1 = Impot1 / revenu1;
+  // const Taux2 = Impot2 / revenu2;
+  const Taux1 = revenu1 > 0 ? Impot1 / revenu1 : 0;
+  const Taux2 = revenu2 > 0 ? Impot2 / revenu2 : 0;
 
   const Taux1Pourcent = (Taux1 * 100).toFixed(1); // ex: 9.2%
   const Taux2Pourcent = (Taux2 * 100).toFixed(1);
 
-  const credit = C1 + C2;
+  const credit = credit1 + credit2;
   console.log('credit : ' + credit);
 
   // Résultats globaux
