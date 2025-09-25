@@ -207,12 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const secondTaxpayerRadios = document.querySelectorAll('input[name="has-second-taxpayer"]');
 
   // Création de l’alerte parent isolé
-  const parentAlertDiv = document.createElement('div');
+  /*const parentAlertDiv = document.createElement('div');
   parentAlertDiv.textContent = "Veuillez ajouter des personnes à charge pour être parent isolé.";
   parentAlertDiv.style.display = 'none';
   parentAlertDiv.style.color = 'red';
   parentAlertDiv.id = 'parent-alert';
-  singleParent.parentElement.appendChild(parentAlertDiv);
+  singleParent.parentElement.appendChild(parentAlertDiv);*/
 
   // Applique toutes les logiques conditionnelles à un déclarant
   function applyConditionsForDeclarant(num) {
@@ -311,16 +311,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- Parent isolé vs veuf ---
-  singleParent.addEventListener('change', () => {
+  /* singleParent.addEventListener('change', () => {
     if (singleParent.checked) {
       widowed.checked = false;
+      document.querySelector('.simulator_parent-isole-warning-text').style.display = 'none';
 
       const hasDependents = checkHasDependents();
       if (!hasDependents) {
         singleParent.checked = false;
-        parentAlertDiv.style.display = 'block';
+        document.querySelector('.simulator_parent-isole-warning-text').style.display = 'block';
+        // parentAlertDiv.style.display = 'block';
         setTimeout(() => {
-          parentAlertDiv.style.display = 'none';
+          // parentAlertDiv.style.display = 'none';
+          document.querySelector('.simulator_parent-isole-warning-text').style.display = 'none';
         }, 5000);
       }
     }
@@ -343,7 +346,72 @@ document.addEventListener('DOMContentLoaded', () => {
       const el = document.getElementById(id);
       return el && parseInt(el.value || '0') > 0;
     });
+  }*/
+
+  // --- Vérifie s'il y a au moins un enfant/personne à charge ---
+  function checkHasDependents() {
+    const ids = [
+      'children-full-custody',
+      'children-shared-custody',
+      'disabled-full-custody-children',
+      'disabled-shared-custody-children',
+      'additional-disabled-dependent'
+    ];
+
+    return ids.some(id => {
+      const el = document.getElementById(id);
+      const value = parseFloat(el?.dataset.actualValue || el?.value || '0');
+      return value > 0;
+    });
   }
+
+  // --- Gestion des cases "parent isolé" et "veuf" ---
+  singleParent.addEventListener('change', () => {
+    if (singleParent.checked) {
+      // Empêche de cocher "parent isolé" si "veuf" est coché
+      widowed.checked = false;
+
+      // Vérifie qu’il y a bien une personne à charge
+      const hasDependents = checkHasDependents();
+      if (!hasDependents) {
+        singleParent.checked = false;
+        const warning = document.querySelector('.simulator_parent-isole-warning-text');
+        warning.style.display = 'block';
+        setTimeout(() => warning.style.display = 'none', 5000);
+      }
+    }
+  });
+
+  widowed.addEventListener('change', () => {
+    if (widowed.checked) {
+      singleParent.checked = false;
+    }
+  });
+
+  // --- Sur modification d’un slider enfants, on revérifie que "parent isolé" reste valide ---
+  const childSliders = [
+    'children-full-custody',
+    'children-shared-custody',
+    'disabled-full-custody-children',
+    'disabled-shared-custody-children',
+    'additional-disabled-dependent'
+  ];
+
+  childSliders.forEach(id => {
+    const slider = document.getElementById(id);
+    if (slider) {
+      slider.addEventListener('input', () => {
+        const hasDependents = checkHasDependents();
+        if (!hasDependents && singleParent.checked) {
+          singleParent.checked = false;
+          const warning = document.querySelector('.simulator_parent-isole-warning-text');
+          warning.style.display = 'block';
+          setTimeout(() => warning.style.display = 'none', 5000);
+        }
+      });
+    }
+  });
+
 });
 
 function syncChildDisabilities() {
@@ -490,9 +558,6 @@ function runTaxSimulationOne() {
   const Réduction = getValue('tax-reduction-1');
   const Crédit = getValue('tax-credit-1');
 
-  console.log('Revenu : ' + Revenu);
-  console.log('Revenu actual value : ' + document.getElementById('net-income-1').dataset.actualValue);
-
   const EnfantE = getActualValue('children-full-custody');
   const EnfantEH = getActualValue('disabled-full-custody-children');
   const EnfantA = getActualValue('children-shared-custody');
@@ -524,7 +589,7 @@ function runTaxSimulationOne() {
   let AbattementS = 0;
   if (Over65 || CaseInvalide > 0) {
     if (RevenuNetGlobal <= 17510) {
-      AbattementS = 2769;
+      AbattementS = 2796;
     } else if (RevenuNetGlobal <= 28170 && RevenuNetGlobal > 17510) {
       AbattementS = 1398;
     } else {
@@ -588,13 +653,26 @@ function runTaxSimulationOne() {
   );
 
   // Étape 11 : Impôt après plafonnement
-  const ImpotApresPlaf = calculateTax(Rimposable) - plafonnement;
+  // const ImpotApresPlaf = calculateTax(Rimposable) - plafonnement;
+  // const ImpotApresPlaf = Math.ceil(calculateTax(Rimposable) - plafonnement);
+  // console.log('ImpotApresPlaf : ' + ImpotApresPlaf);
 
   // Étape 12 : Décote
-  const decote = ImpotApresPlaf <= 1964 ? -Math.min(889 + ImpotApresPlaf * 0.4525, 0) : 0;
+  // const decote = ImpotApresPlaf <= 1964 ? -Math.min(889 + ImpotApresPlaf * 0.4525, 0) : 0;
+  // const decote = ImpotApresPlaf <= 1964 ? -Math.min(889 - ImpotApresPlaf * 0.4525, 0) : 0;
+  // console.log('decote : ' + decote);
+
+  // Étape 11 : Impôt après plafonnement
+  const ImpotApresPlafRaw = calculateTax(Rimposable) - plafonnement;
+  const ImpotApresPlaf = Math.ceil(ImpotApresPlafRaw);
+
+  // Étape 12 : Décote
+  const decote = ImpotApresPlafRaw <= 1964 ? Math.max(889 - ImpotApresPlafRaw * 0.4525, 0) : 0;
 
   // Étape 13 : Réduction min
-  const reductionMin = -Math.min(ImpotApresPlaf + decote, Réduction);
+  const reductionMin = Math.min(ImpotApresPlaf - decote, Réduction);
+  console.log('reductionMin : ' + reductionMin);
+  console.log('reductionMin sans - : ' + Math.min(ImpotApresPlaf - decote, Réduction)); 
 
   // Étape 14 : Hauts revenus
   let HautsRevenus = 0;
@@ -612,25 +690,25 @@ function runTaxSimulationOne() {
   // const Impot = Math.ceil(ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier);
   const Impot = Math.max(
     0,
-    Math.ceil(ImpotApresPlaf + decote + reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier)
+    Math.ceil(ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier)
   );
 
   // Étape 17 : Taux
   const Taux = Revenu <= 0 ? 0 : Math.max(0, ((Impot / Revenu) * 100).toFixed(1));
 
   // Injection des résultats
-  document.getElementById('household-taxable-reference-income').innerText = RFR;
-  document.getElementById('household-taxable-income').innerText = Rimposable;
-  document.getElementById('household-tax-amount').innerText = Impot;
-  document.getElementById('household-tax-rate').innerText = Taux;
+  document.getElementById('household-taxable-reference-income').innerText = RFR.toLocaleString('fr-FR');
+  document.getElementById('household-taxable-income').innerText = Rimposable.toLocaleString('fr-FR');
+  document.getElementById('household-tax-amount').innerText = Impot.toLocaleString('fr-FR');
+  document.getElementById('household-tax-rate').innerText = Taux.toLocaleString('fr-FR');
   document.getElementById('household-tax-shares').innerText = Parts.toFixed(2);
-  document.getElementById('household-quotient').innerText = Math.ceil(quotient);
-  document.getElementById('household-tax-after-plafonnement').innerHTML = Math.ceil(ImpotApresPlaf);
-  document.getElementById('household-decote').innerHTML = - Math.ceil(decote);
-  document.getElementById('household-tax-reduction-applied').innerHTML = Math.ceil(reductionMin);
-  document.getElementById('household-tax-credit-applied').innerHTML = Math.ceil(Crédit);
-  document.getElementById('household-high-income-contribution').innerHTML = Math.ceil(HautsRevenus);
-  document.getElementById('household-social-contribution-realestate').innerHTML = Math.ceil(PrelevSociauxFoncier);
+  document.getElementById('household-quotient').innerText = (Math.ceil(quotient)).toLocaleString('fr-FR');
+  document.getElementById('household-tax-after-plafonnement').innerHTML = (Math.ceil(ImpotApresPlaf)).toLocaleString('fr-FR');
+  document.getElementById('household-decote').innerHTML = (Math.ceil(decote)).toLocaleString('fr-FR');
+  document.getElementById('household-tax-reduction-applied').innerHTML = (Math.ceil(reductionMin)).toLocaleString('fr-FR');
+  document.getElementById('household-tax-credit-applied').innerHTML = (Math.ceil(Crédit)).toLocaleString('fr-FR');
+  document.getElementById('household-high-income-contribution').innerHTML = (Math.ceil(HautsRevenus)).toLocaleString('fr-FR');
+  document.getElementById('household-social-contribution-realestate').innerHTML = (Math.ceil(PrelevSociauxFoncier)).toLocaleString('fr-FR');
 }
 
 
@@ -664,14 +742,6 @@ function getNumber(id) {
 
 function isChecked(id) {
   return document.getElementById(id)?.checked || false;
-}
-
-function setResult(id, value, options = {}) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (options.round === 'euro') value = Math.ceil(value);
-  if (options.round === 'decimal') value = Math.round(value * 10) / 10;
-  el.innerText = isNaN(value) ? '0' : value;
 }
 
 function runTaxSimulationTwo() {
@@ -745,7 +815,7 @@ function runTaxSimulationTwo() {
   // AbattementS
   function getAbattement(R, plus65, ci) {
     if (plus65 || ci) {
-      if (R <= 17510) return 2769;
+      if (R <= 17510) return 2796;
       if (R <= 28170 && R > 17510) return 1398;
     }
     return 0;
@@ -761,13 +831,13 @@ function runTaxSimulationTwo() {
     const eligible2 = plus65_2 || ci_2;
 
     if (eligible1 && eligible2) {
-      if (revenuNetGlobal <= 17510) return 2 * 2769;
+      if (revenuNetGlobal <= 17510) return 2 * 2796;
       if (revenuNetGlobal <= 28170 && revenuNetGlobal > 17510) return 2 * 1398;
       return 0;
     }
 
     if (eligible1 || eligible2) {
-      if (revenuNetGlobal <= 17510) return 2769;
+      if (revenuNetGlobal <= 17510) return 2796;
       if (revenuNetGlobal <= 28170 && revenuNetGlobal > 17510) return 1398;
       return 0;
     }
@@ -860,16 +930,19 @@ function runTaxSimulationTwo() {
 
 
   // Décote
-  const Decote = ImpPlaf <= 3248 ? -Math.min(1470 - ImpPlaf * 0.4525, 0) : 0;
+  // const Decote = ImpPlaf <= 3248 ? -Math.min(1470 - ImpPlaf * 0.4525, 0) : 0;
+  const Decote = ImpPlaf <= 3248 ? Math.max(1470 - ImpPlaf * 0.4525, 0) : 0;
 
-  const Decote1 = ImpPlaf1 <= 1964 ? -Math.min(889 - ImpPlaf1 * 0.4525, 0) : 0;
-  const Decote2 = ImpPlaf2 <= 1964 ? -Math.min(889 - ImpPlaf2 * 0.4525, 0) : 0;
+  // const Decote1 = ImpPlaf1 <= 1964 ? -Math.min(889 - ImpPlaf1 * 0.4525, 0) : 0;
+  // const Decote2 = ImpPlaf2 <= 1964 ? -Math.min(889 - ImpPlaf2 * 0.4525, 0) : 0;
+  const Decote1 = ImpPlaf1 <= 1964 ? Math.max(889 - ImpPlaf * 0.4525, 0) : 0;
+  const Decote2 = ImpPlaf2 <= 1964 ? Math.max(889 - ImpPlaf * 0.4525, 0) : 0;
 
 
   // Réduction min
-  const RedMin1 = -Math.min(ImpPlaf1 + Decote1, reduc1);
-  const RedMin2 = -Math.min(ImpPlaf2 + Decote2, reduc2);
-  const RedMin = -Math.min(ImpPlaf + Decote, reduc1 + reduc2);
+  const RedMin1 = Math.min(ImpPlaf1 - Decote1, reduc1);
+  const RedMin2 = Math.min(ImpPlaf2 - Decote2, reduc2);
+  const RedMin = Math.min(ImpPlaf - Decote, reduc1 + reduc2);
 
   // Hauts revenus
   let HR = 0;
@@ -885,7 +958,7 @@ function runTaxSimulationTwo() {
   // const Impot = Math.ceil(ImpPlaf + Decote + RedMin - credit1 - credit2 + HR + PF);
   const Impot = Math.max(
     0,
-    Math.ceil(ImpPlaf + Decote + RedMin - credit1 - credit2 + HR + PF)
+    Math.ceil(ImpPlaf - Decote - RedMin - credit1 - credit2 + HR + PF)
   );
 
   const Taux = revenu1 + revenu2 > 0 ? Math.max((Impot / (revenu1 + revenu2)) * 100, 0).toFixed(1) : '0';
@@ -895,11 +968,11 @@ function runTaxSimulationTwo() {
   // const Imp2 = Impot - Imp1;
   const ImpotInter1 = Math.max(
     0,
-    Math.ceil(ImpPlaf1 + Decote1 + RedMin1 - credit1 + HR * (revenu1 / (revenu1 + revenu2)) + PF1)
+    Math.ceil(ImpPlaf1 - Decote1 - RedMin1 - credit1 + HR * (revenu1 / (revenu1 + revenu2)) + PF1)
   );
   const ImpotInter2 = Math.max(
     0,
-    Math.ceil(ImpPlaf2 + Decote2 + RedMin2 - credit2 + HR * (revenu2 / (revenu1 + revenu2)) + PF2)
+    Math.ceil(ImpPlaf2 - Decote2 - RedMin2 - credit2 + HR * (revenu2 / (revenu1 + revenu2)) + PF2)
   );
 
 
@@ -929,7 +1002,6 @@ function runTaxSimulationTwo() {
   const Taux2Pourcent = (Taux2 * 100).toFixed(1);
 
   const credit = credit1 + credit2;
-  console.log('credit : ' + credit);
 
   // Résultats globaux
   setResult('household-taxable-reference-income', RFR, { round: 'euro' });
@@ -947,11 +1019,25 @@ function runTaxSimulationTwo() {
   setResult('tax-rate-1', Taux1Pourcent, { round: 'decimal' });
   setResult('tax-rate-2', Taux2Pourcent, { round: 'decimal' });
 
-  document.getElementById('household-tax-after-plafonnement').innerHTML = Math.ceil(ImpPlaf);
-  document.getElementById('household-decote').innerHTML = - Math.ceil(Decote);
-  document.getElementById('household-tax-reduction-applied').innerHTML = Math.ceil(RedMin);
-  document.getElementById('household-tax-credit-applied').innerHTML = Math.ceil(credit);
-  document.getElementById('household-high-income-contribution').innerHTML = Math.ceil(HR);
-  document.getElementById('household-social-contribution-realestate').innerHTML = Math.ceil(PF);
+  // document.getElementById('household-taxable-reference-income').innerHTML = (Math.ceil(RFR)).toLocaleString('fr-FR');
+  // setResult('household-taxable-reference-income', RFR);
+
+  document.getElementById('household-tax-after-plafonnement').innerHTML = (Math.ceil(ImpPlaf)).toLocaleString('fr-FR');
+  document.getElementById('household-decote').innerHTML = (Math.ceil(Decote)).toLocaleString('fr-FR');
+  document.getElementById('household-tax-reduction-applied').innerHTML = (Math.ceil(RedMin)).toLocaleString('fr-FR');
+  document.getElementById('household-tax-credit-applied').innerHTML = (Math.ceil(credit)).toLocaleString('fr-FR');
+  document.getElementById('household-high-income-contribution').innerHTML = (Math.ceil(HR)).toLocaleString('fr-FR');
+  document.getElementById('household-social-contribution-realestate').innerHTML = (Math.ceil(PF)).toLocaleString('fr-FR');
 }
 
+function setResult(id, value) {
+  document.getElementById(id).innerHTML = (Math.ceil(value)).toLocaleString('fr-FR');
+}
+
+/*function setResult(id, value, options = {}) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (options.round === 'euro') value = Math.ceil(value);
+  if (options.round === 'decimal') value = Math.round(value * 10) / 10;
+  el.innerText = isNaN(value) ? '0' : value;
+}*/
