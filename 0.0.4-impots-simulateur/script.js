@@ -517,6 +517,29 @@ function calculateTax(revenue) {
 
 runAppropriateSimulation(); // initialisation au chargement
 
+const inputIds = [
+  'actual-expenses-number-1',
+  'income-deduction-1',
+  'tax-reduction-1',
+  'tax-credit-1',
+  'actual-expenses-number-2',
+  'income-deduction-2',
+  'tax-reduction-2',
+  'tax-credit-2'
+];
+
+inputIds.forEach(id => {
+  const input = document.getElementById(id);
+  if (input) {
+    input.addEventListener('input', () => {
+      const value = parseFloat(input.value);
+      if (value < 0) {
+        input.value = 0;
+      }
+    });
+  }
+});
+
 
 
 // ----------------------------
