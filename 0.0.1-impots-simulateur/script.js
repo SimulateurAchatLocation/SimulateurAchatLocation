@@ -102,7 +102,7 @@
   });
 });*/
 
-document.addEventListener('DOMContentLoaded', () => {
+/*document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.range-slider').forEach(sliderWrapper => {
     const rangeInput = sliderWrapper.querySelector('input[type="range"]');
     const valueDisplay = sliderWrapper.querySelector('.range-value');
@@ -147,6 +147,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialisation
     valueDisplay.textContent = currentValue;
+  });
+});*/
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.range-slider').forEach(sliderWrapper => {
+    const rangeInput = sliderWrapper.querySelector('input[type="range"]');
+    const valueDisplay = sliderWrapper.querySelector('.range-value');
+
+    // Initialisation : stocke la valeur réelle dans le dataset
+    const initialValue = parseFloat(rangeInput.value);
+    rangeInput.dataset.actualValue = initialValue;
+    valueDisplay.textContent = initialValue;
+
+    // 🔁 1. Slider → Span + dataset
+    rangeInput.addEventListener('input', () => {
+      const value = parseFloat(rangeInput.value);
+      rangeInput.dataset.actualValue = value;
+      valueDisplay.textContent = value;
+      runAppropriateSimulation();
+    });
+
+    // 🔁 2. Span → Slider + dataset (même si > max)
+    function updateFromSpan() {
+      const raw = valueDisplay.textContent.replace(/\s/g, '').replace(/[^\d.]/g, '');
+      const parsed = parseFloat(raw);
+
+      if (!isNaN(parsed)) {
+        rangeInput.dataset.actualValue = parsed;
+
+        // Met à jour visuellement le slider sans bloquer la valeur réelle
+        const max = parseFloat(rangeInput.max);
+        rangeInput.value = Math.min(parsed, max); // Position du curseur
+        valueDisplay.textContent = parsed;
+
+        runAppropriateSimulation();
+      } else {
+        // Reset à la dernière valeur correcte
+        valueDisplay.textContent = rangeInput.dataset.actualValue;
+      }
+    }
+
+    valueDisplay.addEventListener('blur', updateFromSpan);
+    valueDisplay.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        valueDisplay.blur();
+      }
+    });
   });
 });
 
@@ -431,20 +480,24 @@ runAppropriateSimulation(); // initialisation au chargement
 function runTaxSimulationOne() {
   // Étape 1 : Récupération des champs
   const getValue = id => parseFloat(document.getElementById(id)?.value || '0');
+  const getActualValue = id => parseFloat(document.getElementById(id)?.dataset.actualValue || '0');
   const isChecked = id => document.getElementById(id)?.checked || false;
 
-  const Revenu = getValue('net-income-1');
-  const RevenuF = getValue('rental-income-1');
+  const Revenu = getActualValue('net-income-1');
+  const RevenuF = getActualValue('rental-income-1');
   const FraisR = getValue('actual-expenses-number-1');
   const Déduction = getValue('income-deduction-1');
   const Réduction = getValue('tax-reduction-1');
   const Crédit = getValue('tax-credit-1');
 
-  const EnfantE = getValue('children-full-custody');
-  const EnfantEH = getValue('disabled-full-custody-children');
-  const EnfantA = getValue('children-shared-custody');
-  const EnfantAH = getValue('disabled-shared-custody-children');
-  const Invalide = getValue('additional-disabled-dependent');
+  console.log('Revenu : ' + Revenu);
+  console.log('Revenu actual value : ' + document.getElementById('net-income-1').dataset.actualValue);
+
+  const EnfantE = getActualValue('children-full-custody');
+  const EnfantEH = getActualValue('disabled-full-custody-children');
+  const EnfantA = getActualValue('children-shared-custody');
+  const EnfantAH = getActualValue('disabled-shared-custody-children');
+  const Invalide = getActualValue('additional-disabled-dependent');
 
   const CaseInvalide = isChecked('disabled-1') ? 0.5 : 0;
   const ParenI = isChecked('single-parent') ? 1 : 0;
@@ -625,9 +678,10 @@ function runTaxSimulationTwo() {
   // Récupération des données déclarant 1
 
   const getValue = id => parseFloat(document.getElementById(id)?.value || '0');
+  const getActualValue = id => parseFloat(document.getElementById(id)?.dataset.actualValue || '0');
 
-  const R1 = getValue('net-income-1');
-  const RF1 = getValue('rental-income-1');
+  const R1 = getActualValue('net-income-1');
+  const RF1 = getActualValue('rental-income-1');
   const F1 = getValue('actual-expenses-number-1');
   const D1 = getValue('income-deduction-1');
   const Red1 = getValue('tax-reduction-1');
@@ -639,8 +693,8 @@ function runTaxSimulationTwo() {
   const CI1 = isChecked('disabled-1') ? 0.5 : 0;
 
   // Récupération des données déclarant 2
-  const R2 = getValue('net-income-2');
-  const RF2 = getValue('rental-income-2');
+  const R2 = getActualValue('net-income-2');
+  const RF2 = getActualValue('rental-income-2');
   const F2 = getValue('actual-expenses-number-2');
   const D2 = getValue('income-deduction-2');
   const Red2 = getValue('tax-reduction-2');
@@ -652,11 +706,11 @@ function runTaxSimulationTwo() {
   const CI2 = isChecked('disabled-2') ? 0.5 : 0;
 
   // Personnes à charge
-  const EnfantE = getValue('children-full-custody');
-  const EnfantEH = getValue('disabled-full-custody-children');
-  const EnfantA = getValue('children-shared-custody');
-  const EnfantAH = getValue('disabled-shared-custody-children');
-  const Invalide = getValue('additional-disabled-dependent');
+  const EnfantE = getActualValue('children-full-custody');
+  const EnfantEH = getActualValue('disabled-full-custody-children');
+  const EnfantA = getActualValue('children-shared-custody');
+  const EnfantAH = getActualValue('disabled-shared-custody-children');
+  const Invalide = getActualValue('additional-disabled-dependent');
   const PI = isChecked('single-parent') ? 1 : 0;
 
   // RevenuSR
