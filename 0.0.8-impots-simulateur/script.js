@@ -437,7 +437,7 @@ function syncChildDisabilities() {
     input.addEventListener('input', () => {
       clampDisabled(fullDisabled, full);
       clampDisabled(sharedDisabled, shared);
-      runTaxSimulation(); // pour recalculer en direct si ça modifie les parts
+      runAppropriateSimulation(); // pour recalculer en direct si ça modifie les parts
     });
   });
 
@@ -720,7 +720,7 @@ function runTaxSimulationOne() {
     Math.ceil(ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier)
   );*/
 
-  let Impot = (ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier).toFixed(2);
+  let Impot = ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier;
 
   if (Impot <= 0) {
     ImpotApresPlaf = 0;
@@ -741,7 +741,7 @@ function runTaxSimulationOne() {
   // Injection des résultats
   document.getElementById('household-taxable-reference-income').innerText = RFR.toLocaleString('fr-FR');
   document.getElementById('household-taxable-income').innerText = Rimposable.toLocaleString('fr-FR');
-  document.getElementById('household-tax-amount').innerText = Impot.toLocaleString('fr-FR');
+  document.getElementById('household-tax-amount').innerText = Number(Impot.toFixed(2)).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });;
   document.getElementById('household-tax-rate').innerText = Taux.toLocaleString('fr-FR');
   document.getElementById('household-tax-shares').innerText = Parts.toFixed(2);
   document.getElementById('household-quotient').innerText = (Math.ceil(quotient)).toLocaleString('fr-FR');
@@ -1002,7 +1002,7 @@ function runTaxSimulationTwo() {
 
   // Impôt final
   // const Impot = Math.ceil(ImpPlaf + Decote + RedMin - credit1 - credit2 + HR + PF);
-  let Impot = (ImpPlaf - Decote - RedMin - credit1 - credit2 + HR + PF).toFixed(2);
+  let Impot = ImpPlaf - Decote - RedMin - credit1 - credit2 + HR + PF;
 
   const Taux = revenu1 + revenu2 > 0 ? Math.max((Impot / (revenu1 + revenu2)) * 100, 0).toFixed(1) : '0';
 
@@ -1076,30 +1076,49 @@ function runTaxSimulationTwo() {
   }
 
   // Résultats globaux
-  setResult('household-taxable-reference-income', RFR, { round: 'euro' });
-  setResult('household-taxable-income', Rimpo, { round: 'euro' });
-  setResult('household-tax-amount', Impot, { round: 'euro' });
-  setResult('household-tax-rate', Taux, { round: 'decimal' });
-  setResult('household-tax-shares', Parts, { round: 'decimal' });
-  setResult('household-quotient', Quotient, { round: 'euro' });
+  // setResult('household-taxable-reference-income', RFR, { round: 'euro' });
+  // setResult('household-taxable-income', Rimpo, { round: 'euro' });
+  // setResult('household-tax-amount', Impot, { round: 'euro' });
+  // setResult('household-tax-rate', Taux, { round: 'decimal' });
+  // setResult('household-tax-shares', Parts, { round: 'decimal' });
+  // setResult('household-quotient', Quotient, { round: 'euro' });
 
   // Résultats par déclarant
-  setResult('reference-taxable-income-1', Rimpo1, { round: 'euro' });
-  setResult('reference-taxable-income-2', Rimpo2, { round: 'euro' });
-  setResult('tax-amount-1', Impot1, { round: 'euro' });
-  setResult('tax-amount-2', Impot2, { round: 'euro' });
-  setResult('tax-rate-1', Taux1Pourcent, { round: 'decimal' });
-  setResult('tax-rate-2', Taux2Pourcent, { round: 'decimal' });
+  // setResult('reference-taxable-income-1', Rimpo1, { round: 'euro' });
+  // setResult('reference-taxable-income-2', Rimpo2, { round: 'euro' });
+  // setResult('tax-amount-1', Impot1, { round: 'euro' });
+  // setResult('tax-amount-2', Impot2, { round: 'euro' });
+  // setResult('tax-rate-1', Taux1Pourcent, { round: 'decimal' });
+  // setResult('tax-rate-2', Taux2Pourcent, { round: 'decimal' });
 
   // document.getElementById('household-taxable-reference-income').innerHTML = (Math.ceil(RFR)).toLocaleString('fr-FR');
   // setResult('household-taxable-reference-income', RFR);
 
+  document.getElementById('household-taxable-reference-income').innerText = RFR.toLocaleString('fr-FR');
+  document.getElementById('household-taxable-income').innerText = Rimpo.toLocaleString('fr-FR');
+  document.getElementById('household-tax-amount').innerText = Number(Impot.toFixed(2)).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });;
+  document.getElementById('household-tax-rate').innerText = Taux.toLocaleString('fr-FR');
+  document.getElementById('household-tax-shares').innerText = Parts.toFixed(2);
+  document.getElementById('household-quotient').innerText = (Math.ceil(Quotient)).toLocaleString('fr-FR');
   document.getElementById('household-tax-after-plafonnement').innerHTML = (Math.ceil(ImpPlaf)).toLocaleString('fr-FR');
   document.getElementById('household-decote').innerHTML = (Math.ceil(Decote)).toLocaleString('fr-FR');
-  document.getElementById('household-tax-reduction-applied').innerHTML = (Math.ceil(RedMin)).toLocaleString('fr-FR');
+  document.getElementById('household-tax-reduction-applied').innerHTML = RedMin.toLocaleString('fr-FR');
   document.getElementById('household-tax-credit-applied').innerHTML = credit.toLocaleString('fr-FR');
   document.getElementById('household-high-income-contribution').innerHTML = HR.toLocaleString('fr-FR');
   document.getElementById('household-social-contribution-realestate').innerHTML = PF.toLocaleString('fr-FR');
+
+  document.getElementById('reference-taxable-income-1').innerHTML = Rimpo1.toLocaleString('fr-FR');
+  document.getElementById('reference-taxable-income-2').innerHTML = Rimpo2.toLocaleString('fr-FR');
+  document.getElementById('tax-amount-1').innerHTML = Number(Impot1.toFixed(2)).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('tax-amount-2').innerHTML = Number(Impot2.toFixed(2)).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('tax-rate-1').innerHTML = Taux1Pourcent.toLocaleString('fr-FR');
+  document.getElementById('tax-rate-2').innerHTML = Taux2Pourcent.toLocaleString('fr-FR');
+  
+  // document.getElementById('household-decote').innerHTML = (Math.ceil(Decote)).toLocaleString('fr-FR');
+  // document.getElementById('household-tax-reduction-applied').innerHTML = (Math.ceil(RedMin)).toLocaleString('fr-FR');
+  // document.getElementById('household-tax-credit-applied').innerHTML = credit.toLocaleString('fr-FR');
+  // document.getElementById('household-high-income-contribution').innerHTML = HR.toLocaleString('fr-FR');
+  // document.getElementById('household-social-contribution-realestate').innerHTML = PF.toLocaleString('fr-FR');
 }
 
 function setResult(id, value) {
