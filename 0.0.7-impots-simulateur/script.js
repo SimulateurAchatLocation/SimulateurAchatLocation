@@ -720,17 +720,19 @@ function runTaxSimulationOne() {
     Math.ceil(ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier)
   );*/
 
-  const Impot = Math.max(
-    0,
-    Math.round(ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier)
-  );
+  let Impot = (ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier).toFixed(2);
 
-  if (Impot === 0) {
+  if (Impot <= 0) {
     ImpotApresPlaf = 0;
     decote = 0;
     reductionMin = 0;
     HautsRevenus = 0;
     PrelevSociauxFoncier = 0;
+    if (Crédit === 0) {
+      Impot = 0;
+    } else {
+      Impot = -Crédit;
+    }
   }
 
   // Étape 17 : Taux
@@ -902,6 +904,10 @@ function runTaxSimulationTwo() {
   // let Parts = 1 + caseInvalide1 + caseInvalide2;
   let Parts = caseInvalide1 + caseInvalide2;
 
+  console.log('Parts : ' + Parts);
+  console.log('caseInvalide1 : ' + caseInvalide1);
+  console.log('caseInvalide2 : ' + caseInvalide2);
+
   const totalEnfants = EnfantE + Invalide;
 
   if (totalEnfants >= 2) {
@@ -996,32 +1002,24 @@ function runTaxSimulationTwo() {
 
   // Impôt final
   // const Impot = Math.ceil(ImpPlaf + Decote + RedMin - credit1 - credit2 + HR + PF);
-  const Impot = Math.max(
-    0,
-    Math.ceil(ImpPlaf - Decote - RedMin - credit1 - credit2 + HR + PF)
-  );
+  let Impot = (ImpPlaf - Decote - RedMin - credit1 - credit2 + HR + PF).toFixed(2);
 
   const Taux = revenu1 + revenu2 > 0 ? Math.max((Impot / (revenu1 + revenu2)) * 100, 0).toFixed(1) : '0';
-
-  if (Impot === 0) {
-    ImpPlaf = 0;
-    Decote = 0;
-    RedMin = 0;
-    HR = 0;
-    PF = 0;
-  }
 
   // Répartition entre déclarants
   // const Imp1 = Math.ceil((Impot * revenu1) / (revenu1 + revenu2));
   // const Imp2 = Impot - Imp1;
-  const ImpotInter1 = Math.max(
+ /* const ImpotInter1 = Math.max(
     0,
     Math.ceil(ImpPlaf1 - Decote1 - RedMin1 - credit1 + HR * (revenu1 / (revenu1 + revenu2)) + PF1)
   );
   const ImpotInter2 = Math.max(
     0,
     Math.ceil(ImpPlaf2 - Decote2 - RedMin2 - credit2 + HR * (revenu2 / (revenu1 + revenu2)) + PF2)
-  );
+  );*/
+
+  const ImpotInter1 = ImpPlaf1 - Decote1 - RedMin1 - credit1 + HR * (revenu1 / (revenu1 + revenu2)) + PF1;
+  const ImpotInter2 = ImpPlaf2 - Decote2 - RedMin2 - credit2 + HR * (revenu2 / (revenu1 + revenu2)) + PF2;
 
 
   // Calcul de la répartition de l’impôt entre chaque déclarant
@@ -1037,8 +1035,11 @@ function runTaxSimulationTwo() {
   // const Impot1 = Math.max(0, Math.ceil(Impot * TauxI1));
   // const Impot2 = Math.max(0,Math.ceil(Impot * TauxI2));
 
-  const Impot1 = Math.max(0, Math.ceil(Impot * TauxI1));
-  const Impot2 = Math.max(0, Math.ceil(Impot * TauxI2));
+  // const Impot1 = Math.max(0, Math.ceil(Impot * TauxI1));
+  // const Impot2 = Math.max(0, Math.ceil(Impot * TauxI2));
+
+  let Impot1 = Impot * TauxI1;
+  let Impot2 = Impot * TauxI2;
 
   // Calcul du taux d’imposition de chaque déclarant
   // const Taux1 = Impot1 / revenu1;
@@ -1046,10 +1047,33 @@ function runTaxSimulationTwo() {
   const Taux1 = revenu1 > 0 ? Impot1 / revenu1 : 0;
   const Taux2 = revenu2 > 0 ? Impot2 / revenu2 : 0;
 
-  const Taux1Pourcent = (Taux1 * 100).toFixed(1); // ex: 9.2%
-  const Taux2Pourcent = (Taux2 * 100).toFixed(1);
+  let Taux1Pourcent = (Taux1 * 100).toFixed(1); // ex: 9.2%
+  let Taux2Pourcent = (Taux2 * 100).toFixed(1);
 
   const credit = credit1 + credit2;
+
+  if (Impot <= 0) {
+    // Impot = credit1 - credit2;
+    ImpPlaf = 0;
+    Decote = 0;
+    RedMin = 0;
+    HR = 0;
+    PF = 0;
+    if (credit === 0) {
+      Impot = 0;
+    } else {
+      Impot = -credit;
+    }
+  }
+
+  if (Impot1 <= 0 || isNaN(Impot1)) {
+    Impot1 = 0;
+    Taux1Pourcent = 0;
+  }
+  if (Impot2 <= 0 || isNaN(Impot2)) {
+    Impot2 = 0;
+    Taux2Pourcent = 0;
+  }
 
   // Résultats globaux
   setResult('household-taxable-reference-income', RFR, { round: 'euro' });
