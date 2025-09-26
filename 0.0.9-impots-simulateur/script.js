@@ -238,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     retirement.addEventListener('change', () => {
       if (retirement.checked) {
         griserFraisReels(true);
+        standardDeduction.checked = true;
         actualExpensesCheckbox.checked = false;
         actualExpesensInputWrapper.classList.add('is-disabled');
         actualExpensesInput.classList.add('actual-expenses-disabled');
@@ -698,15 +699,12 @@ function runTaxSimulationOne() {
   // const reductionMin = Math.min(ImpotApresPlaf - decote, Réduction);
   let reductionMin = Math.min(ImpotApresPlaf + decote, Réduction);
 
-  console.log('reductionMin : ' + reductionMin);
-  console.log('reductionMin sans - : ' + Math.min(ImpotApresPlaf - decote, Réduction)); 
-
   // Étape 14 : Hauts revenus
   let HautsRevenus = 0;
   if (RFR > 250000 && RFR < 500001) {
     HautsRevenus = (RFR - 250001) * 0.03;
   } else if (RFR > 500000) {
-    HautsRevenus = (RFR - 500001) * 0.04 + 7500;
+    HautsRevenus = (RFR - 500000) * 0.04;
   }
 
   // Étape 15 : Prélèvements sociaux fonciers
@@ -842,13 +840,13 @@ function runTaxSimulationTwo() {
   let revenuNet2 = RS2 + revenuF2 - deduction2;
   let revenuNetGlobal;
 
-  /*if ((retraite1 && retraite2 && revenu1 < 450 && revenu2 < 450) || ((revenu1 + revenu2) * 0.1 < 4399 && retraite1 && retraite2)) {
+  /*if ((retraite1 && retraite2 && revenu1 < 4500 && revenu2 < 450) || ((revenu1 + revenu2) * 0.1 < 4399 && retraite1 && retraite2)) {
     revenuNetGlobal = revenu1 + revenu2 - 4399;
   } else {
     revenuNetGlobal = revenuNet1 + revenuNet2;
   }*/
 
-  if ((retraite1 && retraite2 && revenu1 < 450 && (450 + revenu2 * 0.1) > 4399) || (retraite1 && retraite2 && revenu2 < 4500 && (450 + revenu1 * 0.1) > 4399)) {
+  if ((retraite1 && retraite2 && revenu1 < 4500 && (450 + revenu2 * 0.1) > 4399) || (retraite1 && retraite2 && revenu2 < 4500 && (450 + revenu1 * 0.1) > 4399)) {
     revenuNetGlobal = revenu1 + revenu2 - 4399;
   } else {
     revenuNetGlobal = revenuNet1 + revenuNet2;
@@ -898,7 +896,8 @@ function runTaxSimulationTwo() {
   // RFR
   const RFR1 = Math.max(RS1 + revenuF1 - Ab1, 0);
   const RFR2 = Math.max(RS2 + revenuF2 - Ab2, 0);
-  const RFR = Math.max(revenuNet1 + revenuNet2 + deduction1 + deduction2 - AbTotal, 0);
+  // const RFR = Math.max(revenuNet1 + revenuNet2 + deduction1 + deduction2 - AbTotal, 0);
+  const RFR = Math.max(revenuNet1 + revenuNet2 + deduction1 + deduction2 - AbTotal, revenuNetGlobal + deduction1 + deduction2 - AbTotal, 0);
 
   // Parts fiscales
   // let Parts = 1 + caseInvalide1 + caseInvalide2;
@@ -942,7 +941,8 @@ function runTaxSimulationTwo() {
   const ImpotIntermediaire2 = calculateTax(Rimposable2ParPart) * (partsWithoutCI1 * 0.5);
 
   // Plafonnement
-  const ImpBrut = calculateTax(Rimpo);
+  // const ImpBrut = calculateTax(Rimpo);
+  const ImpBrut = calculateTax(Rimpo / 2) * 2;
   const Plaf = Math.min(
     2 * 1791 * (Parts - 2) + (2 * (caseInvalide1 + caseInvalide2) + EnfantEH + EnfantA / 2 + Invalide) * 1785,
     ImpBrut - ImpInter
@@ -986,14 +986,18 @@ function runTaxSimulationTwo() {
 
 
   // Réduction min
-  const RedMin1 = Math.min(ImpPlaf1 - Decote1, reduc1);
-  const RedMin2 = Math.min(ImpPlaf2 - Decote2, reduc2);
-  let RedMin = Math.min(ImpPlaf - Decote, reduc1 + reduc2);
+  // const RedMin1 = Math.min(ImpPlaf1 - Decote1, reduc1);
+  // const RedMin2 = Math.min(ImpPlaf2 - Decote2, reduc2);
+  // let RedMin = Math.min(ImpPlaf - Decote, reduc1 + reduc2);
+
+  const RedMin1 = Math.min(ImpPlaf1 + Decote1, reduc1);
+  const RedMin2 = Math.min(ImpPlaf2 + Decote2, reduc2);
+  let RedMin = Math.min(ImpPlaf + Decote, reduc1 + reduc2);
 
   // Hauts revenus
   let HR = 0;
   if (RFR > 500000 && RFR < 1000001) HR = (RFR - 500001) * 0.03;
-  else if (RFR >= 1000001) HR = (RFR - 1000001) * 0.04 + 15000;
+  else if (RFR >= 1000001) HR = (RFR - 1000000) * 0.04 + 15000;
 
   // Prélèvements sociaux
   const PF1 = revenuF1 * 0.172;
