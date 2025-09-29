@@ -694,7 +694,7 @@ function runTaxSimulationOne() {
 
   // Étape 12 : Décote
   // let decote = ImpotApresPlafRaw <= 1964 ? Math.max(889 - ImpotApresPlafRaw * 0.4525, 0) : 0;
-  let decote = ImpotApresPlafRaw <= 1964 ? Math.max(889 - ImpotApresPlafRaw * 0.4525, 0) : 0;
+  let decote = ImpotApresPlafRaw <= 1964 ? Math.min(889 - ImpotApresPlafRaw * 0.4525, ImpotApresPlafRaw) : 0;
   // const decote = ImpotApresPlaf <= 1964 ? -Math.min(889 + ImpotApresPlaf * 0.4525, 0) : 0;
 
   // Étape 13 : Réduction min
@@ -720,7 +720,7 @@ function runTaxSimulationOne() {
     Math.ceil(ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier)
   );*/
 
-  let Impot = ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier;
+  let Impot = Math.ceil(ImpotApresPlaf) - Math.ceil(decote) - Math.ceil(reductionMin) - Crédit + HautsRevenus + PrelevSociauxFoncier;
 
   /*if (Impot <= 0) {
     ImpotApresPlaf = 0;
@@ -979,12 +979,12 @@ function runTaxSimulationTwo() {
 
   // Décote
   // const Decote = ImpPlaf <= 3248 ? -Math.min(1470 - ImpPlaf * 0.4525, 0) : 0;
-  let Decote = ImpPlaf <= 3248 ? Math.max(1470 - ImpPlaf * 0.4525, 0) : 0;
+  let Decote = ImpPlaf <= 3248 ? Math.min(1470 - ImpPlaf * 0.4525, ImpPlaf) : 0;
 
   // const Decote1 = ImpPlaf1 <= 1964 ? -Math.min(889 - ImpPlaf1 * 0.4525, 0) : 0;
   // const Decote2 = ImpPlaf2 <= 1964 ? -Math.min(889 - ImpPlaf2 * 0.4525, 0) : 0;
-  const Decote1 = ImpPlaf1 <= 1964 ? Math.max(889 - ImpPlaf1 * 0.4525, 0) : 0;
-  const Decote2 = ImpPlaf2 <= 1964 ? Math.max(889 - ImpPlaf2 * 0.4525, 0) : 0;
+  const Decote1 = ImpPlaf1 <= 1964 ? Math.min(889 - ImpPlaf1 * 0.4525, ImpPlaf1) : 0;
+  const Decote2 = ImpPlaf2 <= 1964 ? Math.min(889 - ImpPlaf2 * 0.4525, ImpPlaf2) : 0;
 
 
   // Réduction min
@@ -1012,7 +1012,7 @@ function runTaxSimulationTwo() {
 
   // Impôt final
   // const Impot = Math.ceil(ImpPlaf + Decote + RedMin - credit1 - credit2 + HR + PF);
-  let Impot = ImpPlaf - Decote - RedMin - credit1 - credit2 + HR + PF;
+  let Impot = Math.ceil(ImpPlaf) - Math.ceil(Decote) - Math.ceil(RedMin) - credit1 - credit2 + HR + PF;
 
   const Taux = revenu1 + revenu2 > 0 ? Math.max((Impot / (revenu1 + revenu2)) * 100, 0).toFixed(1) : '0';
 
@@ -1119,8 +1119,8 @@ function runTaxSimulationTwo() {
 
   document.getElementById('reference-taxable-income-1').innerHTML = Rimpo1.toLocaleString('fr-FR');
   document.getElementById('reference-taxable-income-2').innerHTML = Rimpo2.toLocaleString('fr-FR');
-  document.getElementById('tax-amount-1').innerHTML = Number(Impot1.toFixed(2)).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  document.getElementById('tax-amount-2').innerHTML = Number(Impot2.toFixed(2)).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('tax-amount-1').innerHTML = Math.round(Impot1);
+  document.getElementById('tax-amount-2').innerHTML = Math.round(Impot2);
   document.getElementById('tax-rate-1').innerHTML = Taux1Pourcent.toLocaleString('fr-FR');
   document.getElementById('tax-rate-2').innerHTML = Taux2Pourcent.toLocaleString('fr-FR');
   
