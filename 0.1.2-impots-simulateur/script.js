@@ -293,9 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('declarant-2-inputs').style.display = 'block';
         document.getElementById('declarant-2-result').style.display = 'block';
         document.getElementById('declarant-1-result').style.display = 'block';
-        document.querySelectorAll('.is-quotient').forEach((element) => {
-          element.style.display = 'none';
-        });
         singleParent.checked = false;
         widowed.checked = false;
         document.querySelector('.is-single-widow').style.display = 'none';
@@ -304,9 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('declarant-2-inputs').style.display = 'none';
         document.getElementById('declarant-2-result').style.display = 'none';
         document.getElementById('declarant-1-result').style.display = 'none';
-        document.querySelectorAll('.is-quotient').forEach((element) => {
-          element.style.display = 'flex';
-        });
         document.querySelector('.is-single-widow').style.display = 'grid';
         applyConditionsForDeclarant(1);
       }
@@ -699,7 +693,7 @@ function runTaxSimulationOne() {
 
   // Étape 13 : Réduction min
   // const reductionMin = Math.min(ImpotApresPlaf - decote, Réduction);
-  let reductionMin = Math.min(ImpotApresPlaf + decote, Réduction);
+  let reductionMin = Math.min(ImpotApresPlaf - decote, Réduction);
 
   // Étape 14 : Hauts revenus
   let HautsRevenus = 0;
@@ -720,7 +714,7 @@ function runTaxSimulationOne() {
     Math.ceil(ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier)
   );*/
 
-  let Impot = Math.ceil(ImpotApresPlaf) - Math.ceil(decote) - Math.ceil(reductionMin) - Crédit + HautsRevenus + PrelevSociauxFoncier;
+  let Impot = Math.round(ImpotApresPlaf) - Math.round(decote) - Math.round(reductionMin) - Crédit + HautsRevenus + PrelevSociauxFoncier;
 
   /*if (Impot <= 0) {
     ImpotApresPlaf = 0;
@@ -747,7 +741,7 @@ function runTaxSimulationOne() {
   document.getElementById('household-quotient').innerText = (Math.ceil(quotient)).toLocaleString('fr-FR');
   document.getElementById('household-tax-after-plafonnement').innerHTML = (Math.ceil(ImpotApresPlaf)).toLocaleString('fr-FR');
   document.getElementById('household-decote').innerHTML = (Math.ceil(decote)).toLocaleString('fr-FR');
-  document.getElementById('household-tax-reduction-applied').innerHTML = reductionMin.toLocaleString('fr-FR');
+  document.getElementById('household-tax-reduction-applied').innerHTML = Math.floor(reductionMin).toLocaleString('fr-FR');
   document.getElementById('household-tax-credit-applied').innerHTML = Crédit.toLocaleString('fr-FR');
   document.getElementById('household-high-income-contribution').innerHTML = HautsRevenus.toLocaleString('fr-FR');
   document.getElementById('household-social-contribution-realestate').innerHTML = PrelevSociauxFoncier.toLocaleString('fr-FR');
@@ -992,9 +986,9 @@ function runTaxSimulationTwo() {
   // const RedMin2 = Math.min(ImpPlaf2 - Decote2, reduc2);
   // let RedMin = Math.min(ImpPlaf - Decote, reduc1 + reduc2);
 
-  const RedMin1 = Math.min(ImpPlaf1 + Decote1, reduc1);
-  const RedMin2 = Math.min(ImpPlaf2 + Decote2, reduc2);
-  let RedMin = Math.min(ImpPlaf + Decote, reduc1 + reduc2);
+  const RedMin1 = Math.min(ImpPlaf1 - Decote1, reduc1);
+  const RedMin2 = Math.min(ImpPlaf2 - Decote2, reduc2);
+  let RedMin = Math.min(ImpPlaf - Decote, reduc1 + reduc2);
 
   // Hauts revenus
   let HR = 0;
@@ -1012,7 +1006,7 @@ function runTaxSimulationTwo() {
 
   // Impôt final
   // const Impot = Math.ceil(ImpPlaf + Decote + RedMin - credit1 - credit2 + HR + PF);
-  let Impot = Math.ceil(ImpPlaf) - Math.ceil(Decote) - Math.ceil(RedMin) - credit1 - credit2 + HR + PF;
+  let Impot = Math.round(ImpPlaf) - Math.round(Decote) - Math.round(RedMin) - credit1 - credit2 + HR + PF;
 
   const Taux = revenu1 + revenu2 > 0 ? Math.max((Impot / (revenu1 + revenu2)) * 100, 0).toFixed(1) : '0';
 
@@ -1112,7 +1106,7 @@ function runTaxSimulationTwo() {
   document.getElementById('household-quotient').innerText = (Math.ceil(Quotient)).toLocaleString('fr-FR');
   document.getElementById('household-tax-after-plafonnement').innerHTML = (Math.ceil(ImpPlaf)).toLocaleString('fr-FR');
   document.getElementById('household-decote').innerHTML = (Math.ceil(Decote)).toLocaleString('fr-FR');
-  document.getElementById('household-tax-reduction-applied').innerHTML = RedMin.toLocaleString('fr-FR');
+  document.getElementById('household-tax-reduction-applied').innerHTML = Math.floor(RedMin).toLocaleString('fr-FR');
   document.getElementById('household-tax-credit-applied').innerHTML = credit.toLocaleString('fr-FR');
   document.getElementById('household-high-income-contribution').innerHTML = HR.toLocaleString('fr-FR');
   document.getElementById('household-social-contribution-realestate').innerHTML = PF.toLocaleString('fr-FR');
