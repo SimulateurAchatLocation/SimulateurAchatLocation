@@ -28,6 +28,13 @@ function setYearsText(id, years) {
   const el = document.getElementById(id);
   if (!el) return;
   const n = Math.round(years || 0);
+  el.textContent = "Pendant " + n.toLocaleString("fr-FR") + " ans";
+}
+
+function setMaxYearsText(id, years) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const n = Math.round(years || 0);
   el.textContent = n.toLocaleString("fr-FR");
 }
 
@@ -260,188 +267,122 @@ function computeTotalSituation(capital, cTotalMontage, epargne, placementSup) {
   return capital - cTotalMontage + epargne + placementSup;
 }
 
-/**********************************************************
- * FONCTION PRINCIPALE – CALCUL COMPLET
- **********************************************************/
+function renderMensualitesCDC({ m1, d1, m2, d2, ids }) {
+  const { loan1Monthly, loan1Duration, loan2Monthly, loan2Duration } = ids;
 
-/*function runAppropriateSimulation() {
-  // 1. Montages A et B
-  const montageA = computeMontage("A");
-  const montageB = computeMontage("B");
+  // Toujours nettoyer la 2e ligne (au cas où)
+  setText(loan2Monthly, "");
+  setText(loan2Duration, "");
 
-  // Détection des seconds crédits
-  const hasSecondLoanA = document.getElementById("has_second_loan_A")?.checked;
-  const hasSecondLoanB = document.getElementById("has_second_loan_B")?.checked;
-
-  // Totaux par crédit
-  const totalA1 = montageA.loan1.cTotalPart;
-  const totalB1 = montageB.loan1.cTotalPart;
-
-  const totalA2 = hasSecondLoanA ? montageA.loan2.cTotalPart : 0;
-  const totalB2 = hasSecondLoanB ? montageB.loan2.cTotalPart : 0;
-
-  // Totaux globaux
-  const totalAResult = totalA1 + totalA2;
-  const totalBResult = totalB1 + totalB2;
-
-  // 2. Mensualité max & Durée max
-  const mensMax = computeMensMax(
-    montageA.mensualite1,
-    montageA.mensualite2,
-    montageB.mensualite1,
-    montageB.mensualite2
-  );
-  const dureeMax = computeDureeMax(montageA.duree1, montageB.duree1);
-
-  setEuroText("global_max_monthly_payment", mensMax);
-  setNumberText("global_max_duration_years", dureeMax); // valeur numérique
-  setYearsText("global_max_duration_years", dureeMax);  // si tu veux "25 ans"
-
-  // 3. Taux d’épargne (en décimal)
-  const tEpargne = getRateValue("global_savings_rate");
-
-  // 4. Épargne / Placement A
-  const epargneA = computeEpargne(
-    montageA.mensualite1,
-    montageA.mensualite2,
-    montageA.duree1,
-    montageA.duree2,
-    mensMax,
-    dureeMax
-  );
-  const placementSupA = computePlacementSup(
-    montageA.mensualite1,
-    montageA.mensualite2,
-    montageA.duree1,
-    montageA.duree2,
-    mensMax,
-    dureeMax,
-    tEpargne,
-    epargneA
-  );
-
-  // 5. Épargne / Placement B
-  const epargneB = computeEpargne(
-    montageB.mensualite1,
-    montageB.mensualite2,
-    montageB.duree1,
-    montageB.duree2,
-    mensMax,
-    dureeMax
-  );
-  const placementSupB = computePlacementSup(
-    montageB.mensualite1,
-    montageB.mensualite2,
-    montageB.duree1,
-    montageB.duree2,
-    mensMax,
-    dureeMax,
-    tEpargne,
-    epargneB
-  );
-
-  // 6. Totaux
-  const totalA = computeTotalSituation(
-    montageA.capitalTotal,
-    montageA.cTotalMontage,
-    epargneA,
-    placementSupA
-  );
-  const totalB = computeTotalSituation(
-    montageB.capitalTotal,
-    montageB.cTotalMontage,
-    epargneB,
-    placementSupB
-  );
-
-  // highlightBestSimulation(totalA, totalB);
-
-  // Crédit 1 : min
-  highlightBestForTable("loan_result_1", totalA1, totalB1);
-
-  // Crédit 2 : min (si affiché)
-  if (hasSecondLoanA || hasSecondLoanB) {
-    highlightBestForTable("loan_result_2", totalA2, totalB2);
+  // 1 seul crédit
+  if (!m2 || !d2) {
+    setEuroText(loan1Monthly, m1);
+    setText(loan1Duration, `De 0 à ${Math.round(d1)} ans`);
+    return;
   }
 
-  // Projection / situation financière : max
-  highlightBestForTableMax("loan_result_total", totalA, totalB);
+  // 2 crédits (D2 <= D1)
+  const D1 = Math.round(d1);
+  const D2 = Math.round(Math.min(d2, d1));
 
-  // 7. Injection dans le bloc « avancé »
+  // Ligne 1 : de 0 à D2 -> M1 + M2
+  setEuroText(loan1Monthly, m1 + m2);
+  setText(loan1Duration, `De 0 à ${D2} ans`);
 
-  // Épargne accumulée
-  setEuroText("savingsA_accumulated", epargneA);
-  setEuroText("savingsB_accumulated", epargneB);
-
-  // Intérêts de l’épargne
-  setEuroText("savingsA_interest", placementSupA);
-  setEuroText("savingsB_interest", placementSupB);
-
-  // Total épargne + intérêts
-  setEuroText("savingsA_total", epargneA + placementSupA);
-  setEuroText("savingsB_total", epargneB + placementSupB);
-
-  // Argent complémentaire économisé et placé
-  setEuroText("savingsA_extra_amount", epargneA + placementSupA);
-  setEuroText("savingsB_extra_amount", epargneB + placementSupB);
-
-  // Situation financière globale
-  setEuroText("situationA_financial_result", totalA);
-  setEuroText("situationB_financial_result", totalB);
-}*/
+  // Ligne 2 : de D2+1 à D1 -> M1 (si il reste une période)
+  if (D1 > D2) {
+    setEuroText(loan2Monthly, m1);
+    setText(loan2Duration, `De ${D2 + 1} à ${D1} ans`);
+  }
+}
 
 function runAppropriateSimulation() {
-  // Petite sécurité NaN
   const safe = (n) => (Number.isFinite(n) ? n : 0);
 
-  // 1) Montages A et B
+  // 1) Montages
   const montageA = computeMontage("A");
   const montageB = computeMontage("B");
 
   const hasSecondLoanA = !!document.getElementById("has_second_loan_A")?.checked;
   const hasSecondLoanB = !!document.getElementById("has_second_loan_B")?.checked;
 
-  // 2) Totaux "coûts" (crédit+assurance) pour le tableau Résultat (min = best)
-  // -> on compare le total réel du montage (crédit 1 + éventuel crédit 2)
-  const totalA1 = safe(montageA?.loan1?.cTotalPart);
-  const totalB1 = safe(montageB?.loan1?.cTotalPart);
+  // 2) Affichage mensualités (CDC) — IMPORTANT : on écrase le "xx ans" des sliders
+  renderMensualitesCDC({
+    m1: safe(montageA.loan1.mensualite),
+    d1: safe(montageA.loan1.duree),
+    m2: hasSecondLoanA ? safe(montageA.loan2.mensualite) : 0,
+    d2: hasSecondLoanA ? safe(montageA.loan2.duree) : 0,
+    ids: {
+      loan1Monthly: "loan1A_monthly_payment",
+      loan1Duration: "loan1A_duration_years",
+      loan2Monthly: "loan2A_monthly_payment",
+      loan2Duration: "loan2A_duration_years"
+    }
+  });
 
-  const totalA2 = hasSecondLoanA ? safe(montageA?.loan2?.cTotalPart) : 0;
-  const totalB2 = hasSecondLoanB ? safe(montageB?.loan2?.cTotalPart) : 0;
+  renderMensualitesCDC({
+    m1: safe(montageB.loan1.mensualite),
+    d1: safe(montageB.loan1.duree),
+    m2: hasSecondLoanB ? safe(montageB.loan2.mensualite) : 0,
+    d2: hasSecondLoanB ? safe(montageB.loan2.duree) : 0,
+    ids: {
+      loan1Monthly: "loan1B_monthly_payment",
+      loan1Duration: "loan1B_duration_years",
+      loan2Monthly: "loan2B_monthly_payment",
+      loan2Duration: "loan2B_duration_years"
+    }
+  });
 
-  const totalAResult = totalA1 + totalA2;
-  const totalBResult = totalB1 + totalB2;
+  // 3) TOTALS tableau gauche = Crédit 1 + Crédit 2 (si présent)
+  const creditCostA =
+    safe(montageA.loan1.cCreditPart) + (hasSecondLoanA ? safe(montageA.loan2.cCreditPart) : 0);
 
-  // 3) Mensualité max & Durée max (pour la partie avancée)
+  const insuranceCostA =
+    safe(montageA.loan1.cAssurance) + (hasSecondLoanA ? safe(montageA.loan2.cAssurance) : 0);
+
+  const totalAResult = creditCostA + insuranceCostA;
+
+  const creditCostB =
+    safe(montageB.loan1.cCreditPart) + (hasSecondLoanB ? safe(montageB.loan2.cCreditPart) : 0);
+
+  const insuranceCostB =
+    safe(montageB.loan1.cAssurance) + (hasSecondLoanB ? safe(montageB.loan2.cAssurance) : 0);
+
+  const totalBResult = creditCostB + insuranceCostB;
+
+  // ⚠️ On écrase ce que computeSingleLoan a écrit (qui n'était que le crédit 1)
+  setEuroText("loan1A_credit_cost", creditCostA);
+  setEuroText("loan1A_insurance_cost", insuranceCostA);
+  setEuroText("loan1A_total_cost", totalAResult);
+
+  setEuroText("loan1B_credit_cost", creditCostB);
+  setEuroText("loan1B_insurance_cost", insuranceCostB);
+  setEuroText("loan1B_total_cost", totalBResult);
+
+  // 4) Mensualité max & Durée max (avancé)
   const mensMax = safe(
     computeMensMax(
-      safe(montageA?.mensualite1),
-      safe(montageA?.mensualite2),
-      safe(montageB?.mensualite1),
-      safe(montageB?.mensualite2)
+      safe(montageA.mensualite1),
+      safe(montageA.mensualite2),
+      safe(montageB.mensualite1),
+      safe(montageB.mensualite2)
     )
   );
 
-  const dureeMax = safe(
-    computeDureeMax(
-      safe(montageA?.duree1),
-      safe(montageB?.duree1)
-    )
-  );
+  const dureeMax = safe(computeDureeMax(safe(montageA.duree1), safe(montageB.duree1)));
 
   setEuroText("global_max_monthly_payment", mensMax);
-  setYearsText("global_max_duration_years", dureeMax); // => "X ans" dans ton UI
+  setMaxYearsText("global_max_duration_years", dureeMax);
 
-  // 4) Taux placement épargne (décimal attendu par tes formules)
+  // 5) Épargne & intérêts
   const tEpargne = safe(getRateValue("global_savings_rate"));
 
-  // 5) Épargne + intérêts (PDF)
   const epargneA = safe(
     computeEpargne(
-      safe(montageA?.mensualite1),
-      safe(montageA?.mensualite2),
-      safe(montageA?.duree1),
-      safe(montageA?.duree2),
+      safe(montageA.mensualite1),
+      safe(montageA.mensualite2),
+      safe(montageA.duree1),
+      safe(montageA.duree2),
       mensMax,
       dureeMax
     )
@@ -449,10 +390,10 @@ function runAppropriateSimulation() {
 
   const placementSupA = safe(
     computePlacementSup(
-      safe(montageA?.mensualite1),
-      safe(montageA?.mensualite2),
-      safe(montageA?.duree1),
-      safe(montageA?.duree2),
+      safe(montageA.mensualite1),
+      safe(montageA.mensualite2),
+      safe(montageA.duree1),
+      safe(montageA.duree2),
       mensMax,
       dureeMax,
       tEpargne,
@@ -462,10 +403,10 @@ function runAppropriateSimulation() {
 
   const epargneB = safe(
     computeEpargne(
-      safe(montageB?.mensualite1),
-      safe(montageB?.mensualite2),
-      safe(montageB?.duree1),
-      safe(montageB?.duree2),
+      safe(montageB.mensualite1),
+      safe(montageB.mensualite2),
+      safe(montageB.duree1),
+      safe(montageB.duree2),
       mensMax,
       dureeMax
     )
@@ -473,10 +414,10 @@ function runAppropriateSimulation() {
 
   const placementSupB = safe(
     computePlacementSup(
-      safe(montageB?.mensualite1),
-      safe(montageB?.mensualite2),
-      safe(montageB?.duree1),
-      safe(montageB?.duree2),
+      safe(montageB.mensualite1),
+      safe(montageB.mensualite2),
+      safe(montageB.duree1),
+      safe(montageB.duree2),
       mensMax,
       dureeMax,
       tEpargne,
@@ -484,41 +425,25 @@ function runAppropriateSimulation() {
     )
   );
 
-  // 6) Situation financière (PDF) : Total = Capital - CTotal + Épargne + Intérêts
+  // 6) Situation financière
   const totalA = safe(
-    computeTotalSituation(
-      safe(montageA?.capitalTotal),
-      safe(montageA?.cTotalMontage),
-      epargneA,
-      placementSupA
-    )
+    computeTotalSituation(safe(montageA.capitalTotal), totalAResult, epargneA, placementSupA)
   );
 
   const totalB = safe(
-    computeTotalSituation(
-      safe(montageB?.capitalTotal),
-      safe(montageB?.cTotalMontage),
-      epargneB,
-      placementSupB
-    )
+    computeTotalSituation(safe(montageB.capitalTotal), totalBResult, epargneB, placementSupB)
   );
 
-  // 7) Highlight "Résultat"
-  // Tableau Résultat (loan_result_1) : le + économique = total le PLUS BAS
-  highlightBestForTable("loan_result", totalAResult, totalBResult);
-
-  // Tableau projection (loan_result_total) : le meilleur = résultat le PLUS HAUT
-  highlightBestForTableMax("loan_result_advanced", totalA, totalB);
-
-  // 8) Injection avancée (IDs que tu cites)
   setEuroText("savingsA_accumulated", epargneA);
   setEuroText("savingsB_accumulated", epargneB);
-
   setEuroText("savingsA_interest", placementSupA);
   setEuroText("savingsB_interest", placementSupB);
-
   setEuroText("situationA_financial_result", totalA);
   setEuroText("situationB_financial_result", totalB);
+
+  // 7) Highlight (garde tes fonctions existantes + tes IDs)
+  highlightBestForTable("loan_result", totalAResult, totalBResult);
+  highlightBestForTableMax("loan_result_advanced", totalA, totalB);
 }
 
 function highlightBestForTable(tableId, totalA, totalB) {
