@@ -31,6 +31,12 @@ function setYearsText(id, years) {
   el.textContent = n.toLocaleString("fr-FR");
 }
 
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = value ?? "";
+}
+
 /**********************************************************
  * LECTURE DES CHAMPS
  **********************************************************/
@@ -258,7 +264,7 @@ function computeTotalSituation(capital, cTotalMontage, epargne, placementSup) {
  * FONCTION PRINCIPALE – CALCUL COMPLET
  **********************************************************/
 
-function runAppropriateSimulation() {
+/*function runAppropriateSimulation() {
   // 1. Montages A et B
   const montageA = computeMontage("A");
   const montageB = computeMontage("B");
@@ -361,7 +367,6 @@ function runAppropriateSimulation() {
   // Projection / situation financière : max
   highlightBestForTableMax("loan_result_total", totalA, totalB);
 
-
   // 7. Injection dans le bloc « avancé »
 
   // Épargne accumulée
@@ -381,6 +386,137 @@ function runAppropriateSimulation() {
   setEuroText("savingsB_extra_amount", epargneB + placementSupB);
 
   // Situation financière globale
+  setEuroText("situationA_financial_result", totalA);
+  setEuroText("situationB_financial_result", totalB);
+}*/
+
+function runAppropriateSimulation() {
+  // Petite sécurité NaN
+  const safe = (n) => (Number.isFinite(n) ? n : 0);
+
+  // 1) Montages A et B
+  const montageA = computeMontage("A");
+  const montageB = computeMontage("B");
+
+  const hasSecondLoanA = !!document.getElementById("has_second_loan_A")?.checked;
+  const hasSecondLoanB = !!document.getElementById("has_second_loan_B")?.checked;
+
+  // 2) Totaux "coûts" (crédit+assurance) pour le tableau Résultat (min = best)
+  // -> on compare le total réel du montage (crédit 1 + éventuel crédit 2)
+  const totalA1 = safe(montageA?.loan1?.cTotalPart);
+  const totalB1 = safe(montageB?.loan1?.cTotalPart);
+
+  const totalA2 = hasSecondLoanA ? safe(montageA?.loan2?.cTotalPart) : 0;
+  const totalB2 = hasSecondLoanB ? safe(montageB?.loan2?.cTotalPart) : 0;
+
+  const totalAResult = totalA1 + totalA2;
+  const totalBResult = totalB1 + totalB2;
+
+  // 3) Mensualité max & Durée max (pour la partie avancée)
+  const mensMax = safe(
+    computeMensMax(
+      safe(montageA?.mensualite1),
+      safe(montageA?.mensualite2),
+      safe(montageB?.mensualite1),
+      safe(montageB?.mensualite2)
+    )
+  );
+
+  const dureeMax = safe(
+    computeDureeMax(
+      safe(montageA?.duree1),
+      safe(montageB?.duree1)
+    )
+  );
+
+  setEuroText("global_max_monthly_payment", mensMax);
+  setYearsText("global_max_duration_years", dureeMax); // => "X ans" dans ton UI
+
+  // 4) Taux placement épargne (décimal attendu par tes formules)
+  const tEpargne = safe(getRateValue("global_savings_rate"));
+
+  // 5) Épargne + intérêts (PDF)
+  const epargneA = safe(
+    computeEpargne(
+      safe(montageA?.mensualite1),
+      safe(montageA?.mensualite2),
+      safe(montageA?.duree1),
+      safe(montageA?.duree2),
+      mensMax,
+      dureeMax
+    )
+  );
+
+  const placementSupA = safe(
+    computePlacementSup(
+      safe(montageA?.mensualite1),
+      safe(montageA?.mensualite2),
+      safe(montageA?.duree1),
+      safe(montageA?.duree2),
+      mensMax,
+      dureeMax,
+      tEpargne,
+      epargneA
+    )
+  );
+
+  const epargneB = safe(
+    computeEpargne(
+      safe(montageB?.mensualite1),
+      safe(montageB?.mensualite2),
+      safe(montageB?.duree1),
+      safe(montageB?.duree2),
+      mensMax,
+      dureeMax
+    )
+  );
+
+  const placementSupB = safe(
+    computePlacementSup(
+      safe(montageB?.mensualite1),
+      safe(montageB?.mensualite2),
+      safe(montageB?.duree1),
+      safe(montageB?.duree2),
+      mensMax,
+      dureeMax,
+      tEpargne,
+      epargneB
+    )
+  );
+
+  // 6) Situation financière (PDF) : Total = Capital - CTotal + Épargne + Intérêts
+  const totalA = safe(
+    computeTotalSituation(
+      safe(montageA?.capitalTotal),
+      safe(montageA?.cTotalMontage),
+      epargneA,
+      placementSupA
+    )
+  );
+
+  const totalB = safe(
+    computeTotalSituation(
+      safe(montageB?.capitalTotal),
+      safe(montageB?.cTotalMontage),
+      epargneB,
+      placementSupB
+    )
+  );
+
+  // 7) Highlight "Résultat"
+  // Tableau Résultat (loan_result_1) : le + économique = total le PLUS BAS
+  highlightBestForTable("loan_result", totalAResult, totalBResult);
+
+  // Tableau projection (loan_result_total) : le meilleur = résultat le PLUS HAUT
+  highlightBestForTableMax("loan_result_advanced", totalA, totalB);
+
+  // 8) Injection avancée (IDs que tu cites)
+  setEuroText("savingsA_accumulated", epargneA);
+  setEuroText("savingsB_accumulated", epargneB);
+
+  setEuroText("savingsA_interest", placementSupA);
+  setEuroText("savingsB_interest", placementSupB);
+
   setEuroText("situationA_financial_result", totalA);
   setEuroText("situationB_financial_result", totalB);
 }
@@ -447,6 +583,9 @@ function highlightBestForTableMax(tableId, valueA, valueB) {
  **********************************************************/
 
 document.addEventListener("DOMContentLoaded", () => {
+  syncLoan2DurationWithLoan1("A");
+  syncLoan2DurationWithLoan1("B");
+
   /*********** Sliders (taux, durées, etc.) ***********/
   document.querySelectorAll(".range-slider").forEach(sliderWrapper => {
     const rangeInput = sliderWrapper.querySelector('input[type="range"]');
@@ -472,6 +611,15 @@ document.addEventListener("DOMContentLoaded", () => {
       valueDisplay.textContent = value;
 
       updateDurationYearsIfNeeded(rangeInput.id, value);
+
+      if (rangeInput.id === "loan1A_duration") {
+        syncLoan2DurationWithLoan1("A");
+      }
+
+      if (rangeInput.id === "loan1B_duration") {
+        syncLoan2DurationWithLoan1("B");
+      }
+
       runAppropriateSimulation();
     });
 
@@ -517,25 +665,91 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /*********** Affichage des blocs pour 2e crédit et résultats ***********/
-  const cbA = document.getElementById("has_second_loan_A");
-  const cbB = document.getElementById("has_second_loan_B");
-  const creditA2 = document.getElementById("credit_simulation_A2");
-  const creditB2 = document.getElementById("credit_simulation_B2");
-  const creditResult2 = document.getElementById("loan_result_2");
+const cbA = document.getElementById("has_second_loan_A");
+const cbB = document.getElementById("has_second_loan_B");
+const creditA2 = document.getElementById("credit_simulation_A2");
+const creditB2 = document.getElementById("credit_simulation_B2");
+const creditA2Text = document.querySelectorAll(".credit-sim_credit.is-a2");
+const creditB2Text = document.querySelectorAll(".credit-sim_credit.is-b2");
+const creditResult2 = document.getElementById("loan_result_2");
 
-  function updateSecondLoanUI() {
-    const hasA = cbA && cbA.checked;
-    const hasB = cbB && cbB.checked;
+function updateSecondLoanUI() {
+  const hasA = cbA && cbA.checked;
+  const hasB = cbB && cbB.checked;
 
-    if (creditA2) creditA2.style.display = hasA ? "block" : "none";
-    if (creditB2) creditB2.style.display = hasB ? "block" : "none";
-    if (creditResult2) creditResult2.style.display = (hasA || hasB) ? "grid" : "none";
-
-    runAppropriateSimulation();
+  if (hasA) {
+    creditA2.style.display = "block";
+    creditA2Text.forEach(element => {
+      element.style.display = "block";
+    });
+  } else {
+    creditA2.style.display = "none";
+    creditA2Text.forEach(element => {
+      element.style.display = "none";
+    });
   }
 
-  if (cbA) cbA.addEventListener("change", updateSecondLoanUI);
-  if (cbB) cbB.addEventListener("change", updateSecondLoanUI);
+  if (hasB) {
+    creditB2.style.display = "block";
+    creditB2Text.forEach(element => {
+      element.style.display = "block";
+    });
+  } else {
+    creditB2.style.display = "none";
+    creditB2Text.forEach(element => {
+      element.style.display = "none";
+    });
+  }
 
-  /*********** 1er calcul ***********/
-  updateSecondLoanUI(); // appelle aussi runAppropriateSimulation()
+  runAppropriateSimulation();
+}
+
+if (cbA) cbA.addEventListener("change", updateSecondLoanUI);
+if (cbB) cbB.addEventListener("change", updateSecondLoanUI);
+
+/*********** 1er calcul ***********/
+updateSecondLoanUI(); // appelle aussi runAppropriateSimulation()
+
+
+function syncLoan2DurationWithLoan1(letter) {
+  const loan1 = document.getElementById(`loan1${letter}_duration`);
+  const loan2 = document.getElementById(`loan2${letter}_duration`);
+  const loan2Value = document.getElementById(`loan2${letter}_duration_years`);
+
+  if (!loan1 || !loan2) return;
+
+  const d1 = parseFloat(loan1.dataset.actualValue || loan1.value || 0);
+
+  // 1️⃣ Brider le max
+  loan2.max = d1;
+
+  // 2️⃣ Si la valeur actuelle dépasse → on la corrige
+  const currentD2 = parseFloat(loan2.dataset.actualValue || loan2.value || 0);
+  if (currentD2 > d1) {
+    loan2.value = d1;
+    loan2.dataset.actualValue = d1;
+    if (loan2Value) loan2Value.textContent = d1;
+  }
+}
+
+function buildMensualiteDetails(m1, d1, m2, d2) {
+  if (!m2 || !d2) {
+    return [
+      {
+        amount: m1,
+        duration: d1
+      }
+    ];
+  }
+
+  return [
+    {
+      amount: m1 + m2,
+      duration: d2
+    },
+    {
+      amount: m1,
+      duration: d1 - d2
+    }
+  ];
+}
