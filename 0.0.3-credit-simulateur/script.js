@@ -292,7 +292,7 @@ function renderMensualitesCDC({ m1, d1, m2, d2, ids }) {
   // Ligne 2 : de D2+1 à D1 -> M1 (si il reste une période)
   if (D1 > D2) {
     setEuroText(loan2Monthly, m1);
-    setText(loan2Duration, `De ${D2 + 1} à ${D1} ans`);
+    setText(loan2Duration, `De ${D2} à ${D1} ans`);
   }
 }
 
@@ -636,7 +636,7 @@ if (cbB) cbB.addEventListener("change", updateSecondLoanUI);
 updateSecondLoanUI(); // appelle aussi runAppropriateSimulation()
 
 
-function syncLoan2DurationWithLoan1(letter) {
+/*function syncLoan2DurationWithLoan1(letter) {
   const loan1 = document.getElementById(`loan1${letter}_duration`);
   const loan2 = document.getElementById(`loan2${letter}_duration`);
   const loan2Value = document.getElementById(`loan2${letter}_duration_years`);
@@ -654,6 +654,34 @@ function syncLoan2DurationWithLoan1(letter) {
     loan2.value = d1;
     loan2.dataset.actualValue = d1;
     if (loan2Value) loan2Value.textContent = d1;
+  }
+}*/
+
+function syncLoan2DurationWithLoan1(letter) {
+  const loan1 = document.getElementById(`loan1${letter}_duration`);
+  const loan2 = document.getElementById(`loan2${letter}_duration`);
+  const loan2Value = document.getElementById(`loan2${letter}_duration_value`);
+
+  if (!loan1 || !loan2) return;
+
+  const d1 = parseFloat(loan1.dataset.actualValue || loan1.value || 0);
+  const d2 = parseFloat(loan2.dataset.actualValue || loan2.value || 0);
+
+  // 1️⃣ Brider le max du crédit 2
+  loan2.max = d1;
+
+  // 2️⃣ Si loan2 dépasse loan1 → on corrige TOUT (slider + span)
+  if (d2 > d1) {
+    loan2.value = d1;
+    loan2.dataset.actualValue = d1;
+
+    // 🔑 mise à jour du span visible
+    if (loan2Value) {
+      loan2Value.textContent = `${Math.round(d1)}`;
+    }
+
+    // 🔁 relancer le calcul car la valeur a changé automatiquement
+    runAppropriateSimulation();
   }
 }
 
