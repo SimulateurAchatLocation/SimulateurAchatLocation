@@ -2,6 +2,8 @@
  * UTILITAIRES D'AFFICHAGE
  **********************************************************/
 
+let hasUserInteracted = false;
+
 function formatEuro(value) {
   const n = Math.round(value || 0);
   return n.toLocaleString("fr-FR") + " €";
@@ -441,9 +443,45 @@ function runAppropriateSimulation() {
   setEuroText("situationA_financial_result", totalA);
   setEuroText("situationB_financial_result", totalB);
 
+  updateMobileBestSituation(totalA, totalB);
+
   // 7) Highlight (garde tes fonctions existantes + tes IDs)
   highlightBestForTable("loan_result", totalAResult, totalBResult);
   highlightBestForTableMax("loan_result_advanced", totalA, totalB);
+}
+
+function updateMobileBestSituation(totalA, totalB) {
+  const wrapper = document.querySelector(".credit-sim_mobile-result-wrapper");
+  const textEl = wrapper?.querySelector("p");
+
+  if (!wrapper || !textEl) return;
+
+  // uniquement mobile
+  if (window.innerWidth > 991) {
+    wrapper.style.display = "none";
+    return;
+  }
+
+  if (!hasUserInteracted) {
+    wrapper.style.display = "none";
+    return;
+  }
+
+  // Sécurité valeurs
+  if (!Number.isFinite(totalA) || !Number.isFinite(totalB)) {
+    wrapper.style.display = "none";
+    return;
+  }
+
+  wrapper.style.display = "block";
+
+  if (totalA > totalB) {
+    textEl.textContent = "Situation A la plus lucrative";
+  } else if (totalB > totalA) {
+    textEl.textContent = "Situation B la plus lucrative";
+  } else {
+    textEl.textContent = "Situations A et B équivalentes";
+  }
 }
 
 function highlightBestForTable(tableId, totalA, totalB) {
@@ -531,6 +569,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Slider → span + dataset
     rangeInput.addEventListener("input", () => {
+      hasUserInteracted = true;
       const value = parseFloat(rangeInput.value);
       rangeInput.dataset.actualValue = value;
       valueDisplay.textContent = value;
@@ -584,6 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /*********** Inputs number (capital, frais fixes, etc.) ***********/
   document.querySelectorAll('input[type="number"]').forEach(input => {
     input.addEventListener("input", () => {
+      hasUserInteracted = true;
       runAppropriateSimulation();
     });
   });
