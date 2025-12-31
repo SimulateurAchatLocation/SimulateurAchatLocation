@@ -269,7 +269,7 @@ function computeTotalSituation(capital, cTotalMontage, epargne, placementSup) {
   return capital - cTotalMontage + epargne + placementSup;
 }
 
-function renderMensualitesCDC({ m1, d1, m2, d2, ids }) {
+/*function renderMensualitesCDC({ m1, d1, m2, d2, ids }) {
   const { loan1Monthly, loan1Duration, loan2Monthly, loan2Duration } = ids;
 
   // Toujours nettoyer la 2e ligne (au cas où)
@@ -296,6 +296,60 @@ function renderMensualitesCDC({ m1, d1, m2, d2, ids }) {
     setEuroText(loan2Monthly, m1);
     setText(loan2Duration, `De ${D2} à ${D1} ans`);
   }
+}*/
+
+function renderMensualitesCDC({ m1, d1, m2, d2, dMax, ids }) {
+  const { loan1Monthly, loan1Duration, loan2Monthly, loan2Duration, loanTextWrapper } = ids;
+
+  const D1 = Math.round(d1 || 0);
+  const D2 = Math.round(d2 || 0);
+  const DMAX = Math.round(dMax || 0); // Durée de référence la plus longue
+
+  // Reset des champs
+  setText(loan1Monthly, "");
+  setText(loan1Duration, "");
+  setText(loan2Monthly, "");
+  setText(loan2Duration, "");
+
+  const hasLoan2 = m2 > 0 && D2 > 0;
+
+  // ---------- CAS 1 : UN SEUL CRÉDIT (Situation B par exemple) ----------
+  if (!hasLoan2) {
+    // Ligne 1 : Le crédit normal
+    setEuroText(loan1Monthly, m1);
+    setText(loan1Duration, `De 0 à ${D1} ans`);
+
+    // Ligne 2 : Le complément à 0€ si la durée est inférieure au max global
+    if (D1 < DMAX) {
+      // On affiche explicitement "0 €"
+      const elZero = document.getElementById(loan2Monthly);
+      if (elZero) elZero.textContent = "0 €";
+      document.querySelector(loanTextWrapper).style.display = 'block';
+      
+      setText(loan2Duration, `De ${D1} à ${DMAX} ans`);
+    }
+    return;
+  }
+
+  // ---------- CAS 2 : DEUX CRÉDITS (Situation A par exemple) ----------
+  const firstPeriodEnd = Math.min(D1, D2); // Généralement D2 car D2 <= D1 par votre sync
+
+  // Ligne 1 : Somme des deux crédits
+  setEuroText(loan1Monthly, m1 + m2);
+  setText(loan1Duration, `De 0 à ${firstPeriodEnd} ans`);
+
+  // Ligne 2 : Crédit restant (souvent le long terme)
+  if (D1 > firstPeriodEnd) {
+    setEuroText(loan2Monthly, m1);
+    setText(loan2Duration, `De ${firstPeriodEnd} à ${D1} ans`);
+  } 
+  // Optionnel : Si même le crédit le plus long (D1) est plus court que le DMAX global
+  else if (D1 < DMAX) {
+    const elZero = document.getElementById(loan2Monthly);
+    document.querySelector(loanTextWrapper).style.display = 'block';
+    if (elZero) elZero.textContent = "0 €";
+    setText(loan2Duration, `De ${D1} à ${DMAX} ans`);
+  }
 }
 
 function runAppropriateSimulation() {
@@ -308,17 +362,21 @@ function runAppropriateSimulation() {
   const hasSecondLoanA = !!document.getElementById("has_second_loan_A")?.checked;
   const hasSecondLoanB = !!document.getElementById("has_second_loan_B")?.checked;
 
+  const dureeMax = safe(computeDureeMax(safe(montageA.duree1), safe(montageB.duree1)));
+
   // 2) Affichage mensualités (CDC) — IMPORTANT : on écrase le "xx ans" des sliders
   renderMensualitesCDC({
     m1: safe(montageA.loan1.mensualite),
     d1: safe(montageA.loan1.duree),
     m2: hasSecondLoanA ? safe(montageA.loan2.mensualite) : 0,
     d2: hasSecondLoanA ? safe(montageA.loan2.duree) : 0,
+    dMax: dureeMax,
     ids: {
       loan1Monthly: "loan1A_monthly_payment",
       loan1Duration: "loan1A_duration_years",
       loan2Monthly: "loan2A_monthly_payment",
-      loan2Duration: "loan2A_duration_years"
+      loan2Duration: "loan2A_duration_years",
+      loanTextWrapper: ".credit-sim_credit.is-a2"
     }
   });
 
@@ -327,11 +385,13 @@ function runAppropriateSimulation() {
     d1: safe(montageB.loan1.duree),
     m2: hasSecondLoanB ? safe(montageB.loan2.mensualite) : 0,
     d2: hasSecondLoanB ? safe(montageB.loan2.duree) : 0,
+    dMax: dureeMax,
     ids: {
       loan1Monthly: "loan1B_monthly_payment",
       loan1Duration: "loan1B_duration_years",
       loan2Monthly: "loan2B_monthly_payment",
-      loan2Duration: "loan2B_duration_years"
+      loan2Duration: "loan2B_duration_years",
+      loanTextWrapper: ".credit-sim_credit.is-b2"
     }
   });
 
@@ -370,8 +430,6 @@ function runAppropriateSimulation() {
       safe(montageB.mensualite2)
     )
   );
-
-  const dureeMax = safe(computeDureeMax(safe(montageA.duree1), safe(montageB.duree1)));
 
   setEuroText("global_max_monthly_payment", mensMax);
   setMaxYearsText("global_max_duration_years", dureeMax);
@@ -637,6 +695,8 @@ const creditB2 = document.getElementById("credit_simulation_B2");
 const creditA2Text = document.querySelectorAll(".credit-sim_credit.is-a2");
 const creditB2Text = document.querySelectorAll(".credit-sim_credit.is-b2");
 const creditResult2 = document.getElementById("loan_result_2");
+const situationALoanNumber = document.getElementById("situationA_loan_number");
+const situationBLoanNumber = document.getElementById("situationB_loan_number");
 
 function updateSecondLoanUI() {
   const hasA = cbA && cbA.checked;
@@ -647,11 +707,13 @@ function updateSecondLoanUI() {
     creditA2Text.forEach(element => {
       element.style.display = "block";
     });
+    situationALoanNumber.textContent = "Crédit 1 + 2";
   } else {
     creditA2.style.display = "none";
-    creditA2Text.forEach(element => {
+    situationALoanNumber.textContent = "Crédit 1";
+    /*creditA2Text.forEach(element => {
       element.style.display = "none";
-    });
+    });*/
   }
 
   if (hasB) {
@@ -659,11 +721,13 @@ function updateSecondLoanUI() {
     creditB2Text.forEach(element => {
       element.style.display = "block";
     });
+    situationBLoanNumber.textContent = "Crédit 1 + 2";
   } else {
     creditB2.style.display = "none";
-    creditB2Text.forEach(element => {
+    situationBLoanNumber.textContent = "Crédit 1";
+    /*creditB2Text.forEach(element => {
       element.style.display = "none";
-    });
+    });*/
   }
 
   runAppropriateSimulation();
