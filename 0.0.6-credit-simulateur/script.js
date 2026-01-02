@@ -299,7 +299,7 @@ function computeTotalSituation(capital, cTotalMontage, epargne, placementSup) {
 }*/
 
 function renderMensualitesCDC({ m1, d1, m2, d2, dMax, ids }) {
-  const { loan1Monthly, loan1Duration, loan2Monthly, loan2Duration, loanTextWrapper } = ids;
+  const { loan1Monthly, loan1Duration, loan2Monthly, loan2Duration, loan0Monthly, loan0Duration, loanTextWrapper } = ids;
 
   const D1 = Math.round(d1 || 0);
   const D2 = Math.round(d2 || 0);
@@ -310,6 +310,8 @@ function renderMensualitesCDC({ m1, d1, m2, d2, dMax, ids }) {
   setText(loan1Duration, "");
   setText(loan2Monthly, "");
   setText(loan2Duration, "");
+  setText(loan0Monthly, "");
+  setText(loan0Duration, "");
 
   const hasLoan2 = m2 > 0 && D2 > 0;
 
@@ -322,11 +324,11 @@ function renderMensualitesCDC({ m1, d1, m2, d2, dMax, ids }) {
     // Ligne 2 : Le complément à 0€ si la durée est inférieure au max global
     if (D1 < DMAX) {
       // On affiche explicitement "0 €"
-      const elZero = document.getElementById(loan2Monthly);
+      const elZero = document.getElementById(loan0Monthly);
       if (elZero) elZero.textContent = "0 €";
       document.querySelector(loanTextWrapper).style.display = 'block';
       
-      setText(loan2Duration, `De ${D1} à ${DMAX} ans`);
+      setText(loan0Duration, `De ${D1} à ${DMAX} ans`);
     }
     return;
   }
@@ -345,10 +347,10 @@ function renderMensualitesCDC({ m1, d1, m2, d2, dMax, ids }) {
   } 
   // Optionnel : Si même le crédit le plus long (D1) est plus court que le DMAX global
   else if (D1 < DMAX) {
-    const elZero = document.getElementById(loan2Monthly);
+    const elZero = document.getElementById(loan0Monthly);
     document.querySelector(loanTextWrapper).style.display = 'block';
     if (elZero) elZero.textContent = "0 €";
-    setText(loan2Duration, `De ${D1} à ${DMAX} ans`);
+    setText(loan0Duration, `De ${D1} à ${DMAX} ans`);
   }
 }
 
@@ -376,7 +378,9 @@ function runAppropriateSimulation() {
       loan1Duration: "loan1A_duration_years",
       loan2Monthly: "loan2A_monthly_payment",
       loan2Duration: "loan2A_duration_years",
-      loanTextWrapper: ".credit-sim_credit.is-a2"
+      loan0Monthly: "loan0A_monthly_payment",
+      loan0Duration: "loan0A_duration_years",
+      loanTextWrapper: ".credit-sim_credit.is-a0"
     }
   });
 
@@ -391,7 +395,9 @@ function runAppropriateSimulation() {
       loan1Duration: "loan1B_duration_years",
       loan2Monthly: "loan2B_monthly_payment",
       loan2Duration: "loan2B_duration_years",
-      loanTextWrapper: ".credit-sim_credit.is-b2"
+      loan0Monthly: "loan0B_monthly_payment",
+      loan0Duration: "loan0B_duration_years",
+      loanTextWrapper: ".credit-sim_credit.is-b0"
     }
   });
 
@@ -702,6 +708,19 @@ function updateSecondLoanUI() {
   const hasA = cbA && cbA.checked;
   const hasB = cbB && cbB.checked;
 
+  if (creditA2) creditA2.style.display = hasA ? "block" : "none";
+  if (creditB2) creditB2.style.display = hasB ? "block" : "none";
+
+  if (situationALoanNumber) situationALoanNumber.textContent = hasA ? "Crédit 1 + 2" : "Crédit 1";
+  if (situationBLoanNumber) situationBLoanNumber.textContent = hasB ? "Crédit 1 + 2" : "Crédit 1";
+
+  runAppropriateSimulation();
+}
+
+/*function updateSecondLoanUI() {
+  const hasA = cbA && cbA.checked;
+  const hasB = cbB && cbB.checked;
+
   if (hasA) {
     creditA2.style.display = "block";
     creditA2Text.forEach(element => {
@@ -711,9 +730,6 @@ function updateSecondLoanUI() {
   } else {
     creditA2.style.display = "none";
     situationALoanNumber.textContent = "Crédit 1";
-    /*creditA2Text.forEach(element => {
-      element.style.display = "none";
-    });*/
   }
 
   if (hasB) {
@@ -725,41 +741,16 @@ function updateSecondLoanUI() {
   } else {
     creditB2.style.display = "none";
     situationBLoanNumber.textContent = "Crédit 1";
-    /*creditB2Text.forEach(element => {
-      element.style.display = "none";
-    });*/
   }
 
   runAppropriateSimulation();
-}
+}*/
 
 if (cbA) cbA.addEventListener("change", updateSecondLoanUI);
 if (cbB) cbB.addEventListener("change", updateSecondLoanUI);
 
 /*********** 1er calcul ***********/
 updateSecondLoanUI(); // appelle aussi runAppropriateSimulation()
-
-
-/*function syncLoan2DurationWithLoan1(letter) {
-  const loan1 = document.getElementById(`loan1${letter}_duration`);
-  const loan2 = document.getElementById(`loan2${letter}_duration`);
-  const loan2Value = document.getElementById(`loan2${letter}_duration_years`);
-
-  if (!loan1 || !loan2) return;
-
-  const d1 = parseFloat(loan1.dataset.actualValue || loan1.value || 0);
-
-  // 1️⃣ Brider le max
-  loan2.max = d1;
-
-  // 2️⃣ Si la valeur actuelle dépasse → on la corrige
-  const currentD2 = parseFloat(loan2.dataset.actualValue || loan2.value || 0);
-  if (currentD2 > d1) {
-    loan2.value = d1;
-    loan2.dataset.actualValue = d1;
-    if (loan2Value) loan2Value.textContent = d1;
-  }
-}*/
 
 function syncLoan2DurationWithLoan1(letter) {
   const loan1 = document.getElementById(`loan1${letter}_duration`);
