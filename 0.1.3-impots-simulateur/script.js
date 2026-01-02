@@ -1,156 +1,3 @@
-/*document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.range-slider').forEach(sliderWrapper => {
-    const rangeInput = sliderWrapper.querySelector('input[type="range"]');
-    const valueDisplay = sliderWrapper.querySelector('.range-value');
-
-    // ✅ Fonction commune : mise à jour du span ET éventuel dataset
-    function updateValueDisplay(val) {
-      const value = parseFloat(val);
-      if (rangeInput.classList.contains('percentage-thumb') && value === 0) {
-        rangeInput.dataset.actualValue = 1e-9;
-        valueDisplay.textContent = 0;
-      } else {
-        rangeInput.dataset.actualValue = value;
-        valueDisplay.textContent = value;
-      }
-    }
-
-    // 🔁 1. Slider → Span
-    rangeInput.addEventListener('input', () => {
-      updateValueDisplay(rangeInput.value);
-      runAppropriateSimulation(); // appel calcul en direct
-    });
-
-    // 🔁 2. Span → Slider (au blur ou Enter)
-    function updateSliderFromSpan() {
-      const newValue = parseFloat(valueDisplay.textContent.replace(/\s/g, '').replace(/[^\d.]/g, ''));
-      if (!isNaN(newValue)) {
-        const min = parseFloat(rangeInput.min);
-        const max = parseFloat(rangeInput.max);
-        const clampedValue = Math.min(Math.max(newValue, min), max);
-
-        rangeInput.value = clampedValue;
-        updateValueDisplay(clampedValue);
-        runAppropriateSimulation(); // appel calcul en direct
-      } else {
-        // Valeur invalide : on remet à jour avec la valeur actuelle
-        updateValueDisplay(rangeInput.value);
-      }
-    }
-
-    valueDisplay.addEventListener('blur', updateSliderFromSpan);
-    valueDisplay.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        valueDisplay.blur(); // force blur → déclenche update
-      }
-    });
-
-    // Initialisation à la valeur actuelle
-    updateValueDisplay(rangeInput.value);
-  });
-});*/
-
-/*document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.range-slider').forEach(sliderWrapper => {
-    const rangeInput = sliderWrapper.querySelector('input[type="range"]');
-    const valueDisplay = sliderWrapper.querySelector('.range-value');
-
-    // ✅ Met à jour le span quand on bouge le slider
-    rangeInput.addEventListener('input', () => {
-      const value = parseFloat(rangeInput.value);
-      valueDisplay.textContent = isNaN(value) ? '' : value;
-      runAppropriateSimulation();
-    });
-
-    // ✅ Met à jour le slider ET le max si la valeur dépasse
-    function updateSliderFromSpan() {
-      const raw = valueDisplay.textContent;
-      const newValue = parseFloat(raw.replace(/\s/g, '').replace(/[^\d.]/g, ''));
-
-      if (!isNaN(newValue)) {
-        // Si valeur > max, on augmente dynamiquement le max
-        const currentMax = parseFloat(rangeInput.max);
-        if (newValue > currentMax) {
-          rangeInput.max = newValue;
-        }
-
-        rangeInput.value = newValue;
-
-        // Déclenche manuellement l'événement 'input' pour mise à jour
-        const event = new Event('input', { bubbles: true });
-        rangeInput.dispatchEvent(event);
-      } else {
-        // Valeur invalide → reset sur valeur actuelle
-        valueDisplay.textContent = rangeInput.value;
-      }
-    }
-
-    // Blur = sortie du champ → mise à jour slider + calcul
-    valueDisplay.addEventListener('blur', updateSliderFromSpan);
-
-    // Entrée = mise à jour immédiate
-    valueDisplay.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        valueDisplay.blur();
-      }
-    });
-
-    // Initialisation
-    valueDisplay.textContent = rangeInput.value;
-  });
-});*/
-
-/*document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.range-slider').forEach(sliderWrapper => {
-    const rangeInput = sliderWrapper.querySelector('input[type="range"]');
-    const valueDisplay = sliderWrapper.querySelector('.range-value');
-
-    // Valeur réelle utilisée dans les calculs
-    let currentValue = parseFloat(rangeInput.value);
-
-    // 🔁 1. Slider → Span (standard)
-    rangeInput.addEventListener('input', () => {
-      currentValue = parseFloat(rangeInput.value);
-      valueDisplay.textContent = currentValue;
-      runAppropriateSimulation(); // appel du simulateur en direct
-    });
-
-    // 🔁 2. Span → Slider (au blur ou Enter) même si > max
-    function updateFromSpan() {
-      const raw = valueDisplay.textContent.replace(/\s/g, '').replace(/[^\d.]/g, '');
-      const parsed = parseFloat(raw);
-
-      if (!isNaN(parsed)) {
-        currentValue = parsed;
-
-        // On met à jour visuellement le slider à sa position max
-        const max = parseFloat(rangeInput.max);
-        rangeInput.value = Math.min(parsed, max); // Positionne le curseur
-        valueDisplay.textContent = parsed;
-
-        runAppropriateSimulation();
-      } else {
-        // En cas de valeur invalide : reset
-        valueDisplay.textContent = currentValue;
-      }
-    }
-
-    valueDisplay.addEventListener('blur', updateFromSpan);
-    valueDisplay.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        valueDisplay.blur(); // déclenche updateFromSpan
-      }
-    });
-
-    // Initialisation
-    valueDisplay.textContent = currentValue;
-  });
-});*/
-
-
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.range-slider').forEach(sliderWrapper => {
     const rangeInput = sliderWrapper.querySelector('input[type="range"]');
@@ -205,14 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const singleParent = document.getElementById('single-parent');
   const widowed = document.getElementById('widowed');
   const secondTaxpayerRadios = document.querySelectorAll('input[name="has-second-taxpayer"]');
-
-  // Création de l’alerte parent isolé
-  /*const parentAlertDiv = document.createElement('div');
-  parentAlertDiv.textContent = "Veuillez ajouter des personnes à charge pour être parent isolé.";
-  parentAlertDiv.style.display = 'none';
-  parentAlertDiv.style.color = 'red';
-  parentAlertDiv.id = 'parent-alert';
-  singleParent.parentElement.appendChild(parentAlertDiv);*/
 
   // Applique toutes les logiques conditionnelles à un déclarant
   function applyConditionsForDeclarant(num) {
@@ -289,61 +128,36 @@ document.addEventListener('DOMContentLoaded', () => {
   secondTaxpayerRadios.forEach(radio => {
     radio.addEventListener('change', () => {
       const selected = document.querySelector('input[name="has-second-taxpayer"]:checked');
+      const declarant1Wrapper = document.getElementById('declarant-1-inputs');
+      const declarant2Wrapper = document.getElementById('declarant-2-inputs');
+      const declarant1Result = document.getElementById('declarant-1-result');
+      const declarant2Result = document.getElementById('declarant-2-result');
+
+      const isDesktop = window.innerWidth >= 991;
+
       if (selected.value === 'yes') {
-        document.getElementById('declarant-2-inputs').style.display = 'block';
-        document.getElementById('declarant-2-result').style.display = 'block';
-        document.getElementById('declarant-1-result').style.display = 'block';
+        declarant2Wrapper.style.display = 'block';
+        declarant1Wrapper.style.gridColumn = isDesktop ? "span 1" : "auto";
+
+        declarant2Result.style.display = 'block';
+        declarant1Result.style.display = 'block';
+
         singleParent.checked = false;
         widowed.checked = false;
         document.querySelector('.is-single-widow').style.display = 'none';
         applyConditionsForDeclarant(2);
       } else {
-        document.getElementById('declarant-2-inputs').style.display = 'none';
-        document.getElementById('declarant-2-result').style.display = 'none';
-        document.getElementById('declarant-1-result').style.display = 'none';
+        declarant2Wrapper.style.display = 'none';
+        declarant1Wrapper.style.gridColumn = isDesktop ? "span 2" : "auto";
+
+        declarant2Result.style.display = 'none';
+        declarant1Result.style.display = 'none';
+
         document.querySelector('.is-single-widow').style.display = 'grid';
         applyConditionsForDeclarant(1);
       }
     });
   });
-
-  // --- Parent isolé vs veuf ---
-  /* singleParent.addEventListener('change', () => {
-    if (singleParent.checked) {
-      widowed.checked = false;
-      document.querySelector('.simulator_parent-isole-warning-text').style.display = 'none';
-
-      const hasDependents = checkHasDependents();
-      if (!hasDependents) {
-        singleParent.checked = false;
-        document.querySelector('.simulator_parent-isole-warning-text').style.display = 'block';
-        // parentAlertDiv.style.display = 'block';
-        setTimeout(() => {
-          // parentAlertDiv.style.display = 'none';
-          document.querySelector('.simulator_parent-isole-warning-text').style.display = 'none';
-        }, 5000);
-      }
-    }
-  });
-
-  widowed.addEventListener('change', () => {
-    if (widowed.checked) {
-      singleParent.checked = false;
-    }
-  });
-
-  // Vérifie si au moins une personne à charge est présente (enfants ou personnes invalides)
-  function checkHasDependents() {
-    const ids = [
-      'children-full-custody',
-      'children-shared-custody'
-    ];
-
-    return ids.some(id => {
-      const el = document.getElementById(id);
-      return el && parseInt(el.value || '0') > 0;
-    });
-  }*/
 
   // --- Vérifie s'il y a au moins un enfant/personne à charge ---
   function checkHasDependents() {
@@ -543,28 +357,6 @@ inputIds.forEach(id => {
 // SIMULATEUR D'IMPÔT (1 déclarant)
 // ----------------------------
 
-/*document.addEventListener('DOMContentLoaded', () => {
-  const fields = [
-    'net-income-1', 'rental-income-1', 'actual-expenses-number-1',
-    'income-deduction-1', 'tax-reduction-1', 'tax-credit-1',
-    'children-full-custody', 'disabled-full-custody-children',
-    'children-shared-custody', 'disabled-shared-custody-children',
-    'additional-disabled-dependent',
-    'retirement-1', 'standard-deduction-1', 'actual-expenses-checkbox-1',
-    'over-65-1', 'disabled-1', 'single-parent', 'widowed'
-  ];
-
-  fields.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('input', runTaxSimulationOne);
-      el.addEventListener('change', runTaxSimulationOne);
-    }
-  });
-
-  runTaxSimulationOne(); // Run once at load
-});*/
-
 function runTaxSimulationOne() {
   // Étape 1 : Récupération des champs
   const getValue = id => parseFloat(document.getElementById(id)?.value || '0');
@@ -673,16 +465,6 @@ function runTaxSimulationOne() {
   );
 
   // Étape 11 : Impôt après plafonnement
-  // const ImpotApresPlaf = calculateTax(Rimposable) - plafonnement;
-  // const ImpotApresPlaf = Math.ceil(calculateTax(Rimposable) - plafonnement);
-  // console.log('ImpotApresPlaf : ' + ImpotApresPlaf);
-
-  // Étape 12 : Décote
-  // const decote = ImpotApresPlaf <= 1964 ? -Math.min(889 + ImpotApresPlaf * 0.4525, 0) : 0;
-  // const decote = ImpotApresPlaf <= 1964 ? -Math.min(889 - ImpotApresPlaf * 0.4525, 0) : 0;
-  // console.log('decote : ' + decote);
-
-  // Étape 11 : Impôt après plafonnement
   const ImpotApresPlafRaw = calculateTax(Rimposable) - plafonnement;
   let ImpotApresPlaf = Math.ceil(ImpotApresPlafRaw);
 
@@ -706,30 +488,9 @@ function runTaxSimulationOne() {
   // Étape 15 : Prélèvements sociaux fonciers
   let PrelevSociauxFoncier = RevenuF * 0.172;
 
-  // Étape 16 : Impôt final
-  // const Impot = Math.ceil(ImpotApresPlaf + decote + reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier);
-  // const Impot = Math.ceil(ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier);
-  /*const Impot = Math.max(
-    0,
-    Math.ceil(ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier)
-  );*/
-
   let Impot = Math.round(ImpotApresPlaf) - Math.round(decote) - Math.round(reductionMin) - Crédit + HautsRevenus + PrelevSociauxFoncier;
 
-  /*if (Impot <= 0) {
-    ImpotApresPlaf = 0;
-    decote = 0;
-    reductionMin = 0;
-    HautsRevenus = 0;
-    PrelevSociauxFoncier = 0;
-    if (Crédit === 0) {
-      Impot = 0;
-    } else {
-      Impot = -Crédit;
-    }
-  }*/
-
-  // Étape 17 : Taux
+  // Étape 16 : Taux
   const Taux = Revenu <= 0 ? 0 : Math.max(0, ((Impot / Revenu) * 100).toFixed(1));
 
   // Injection des résultats
@@ -746,27 +507,6 @@ function runTaxSimulationOne() {
   document.getElementById('household-high-income-contribution').innerHTML = HautsRevenus.toLocaleString('fr-FR');
   document.getElementById('household-social-contribution-realestate').innerHTML = PrelevSociauxFoncier.toLocaleString('fr-FR');
 }
-
-
-// ----------------------------
-// SIMULATEUR D'IMPÔT (2 déclarants)
-// ----------------------------
-
-// Fonction appelée automatiquement à chaque changement
-/*document.addEventListener('DOMContentLoaded', () => {
-  const inputs = document.querySelectorAll('input');
-  inputs.forEach(input => {
-    ['input', 'change', 'blur', 'keyup'].forEach(event => {
-      input.addEventListener(event, runTaxSimulationTwo);
-    });
-  });
-
-  runTaxSimulationTwo(); // initialisation au chargement
-});*/
-
-/*function getNumber(id) {
-  return parseFloat(document.getElementById(id)?.value || '0');
-}*/
 
 function getNumber(id) {
   const span = document.getElementById(id + '-value');
@@ -835,12 +575,6 @@ function runTaxSimulationTwo() {
   let revenuNet1 = RS1 + revenuF1 - deduction1;
   let revenuNet2 = RS2 + revenuF2 - deduction2;
   let revenuNetGlobal;
-
-  /*if ((retraite1 && retraite2 && revenu1 < 4500 && revenu2 < 450) || ((revenu1 + revenu2) * 0.1 < 4399 && retraite1 && retraite2)) {
-    revenuNetGlobal = revenu1 + revenu2 - 4399;
-  } else {
-    revenuNetGlobal = revenuNet1 + revenuNet2;
-  }*/
 
   if ((retraite1 && retraite2 && revenu1 < 4500 && (450 + revenu2 * 0.1) > 4399) || (retraite1 && retraite2 && revenu2 < 4500 && (450 + revenu1 * 0.1) > 4399) || retraite1 && retraite2 && ((revenu1 + revenu2) * 0.1) > 4399) {
     revenuNetGlobal = revenu1 + revenu2 - 4399;
@@ -923,10 +657,6 @@ function runTaxSimulationTwo() {
 
   const Quotient = Rimpo / Parts;
   const ImpInter = calculateTax(Quotient) * Parts;
-  /*const quotient1 = Rimpo1 / ((Parts - caseInvalide1 + caseInvalide2) * 0.5);
-  const quotient2 = Rimpo2 / ((Parts - caseInvalide2 + caseInvalide1) * 0.5);
-  const ImpInter1 = calculateTax(quotient1) * ((Parts - caseInvalide1 + caseInvalide2) * 0.5);
-  const ImpInter2 = calculateTax(quotient2) * ((Parts - caseInvalide2 + caseInvalide1) * 0.5);*/
   const partsWithoutCI2 = Parts - caseInvalide2 + caseInvalide1;
   const partsWithoutCI1 = Parts - caseInvalide1 + caseInvalide2;
 
@@ -1010,18 +740,6 @@ function runTaxSimulationTwo() {
 
   const Taux = revenu1 + revenu2 > 0 ? Math.max((Impot / (revenu1 + revenu2)) * 100, 0).toFixed(1) : '0';
 
-  // Répartition entre déclarants
-  // const Imp1 = Math.ceil((Impot * revenu1) / (revenu1 + revenu2));
-  // const Imp2 = Impot - Imp1;
- /* const ImpotInter1 = Math.max(
-    0,
-    Math.ceil(ImpPlaf1 - Decote1 - RedMin1 - credit1 + HR * (revenu1 / (revenu1 + revenu2)) + PF1)
-  );
-  const ImpotInter2 = Math.max(
-    0,
-    Math.ceil(ImpPlaf2 - Decote2 - RedMin2 - credit2 + HR * (revenu2 / (revenu1 + revenu2)) + PF2)
-  );*/
-
   const ImpotInter1 = ImpPlaf1 - Decote1 - RedMin1 - credit1 + HR * (revenu1 / (revenu1 + revenu2)) + PF1;
   const ImpotInter2 = ImpPlaf2 - Decote2 - RedMin2 - credit2 + HR * (revenu2 / (revenu1 + revenu2)) + PF2;
 
@@ -1031,16 +749,6 @@ function runTaxSimulationTwo() {
   // const TauxI2 = revenu2 > 0 ? (ImpotInter2 / (ImpotInter1 + ImpotInter2)) * 100 : 0;
   const TauxI1 = revenu1 > 0 ? (ImpotInter1 / (ImpotInter1 + ImpotInter2)) : 0;
   const TauxI2 = revenu2 > 0 ? (ImpotInter2 / (ImpotInter1 + ImpotInter2)) : 0;
-
-  // const Taux1 = revenu1 > 0 ? (Imp1 / revenu1) * 100 : 0;
-  // const Taux2 = revenu2 > 0 ? (Imp2 / revenu2) * 100 : 0;
-
-  // Calcul final de l’impôt de chaque déclarant
-  // const Impot1 = Math.max(0, Math.ceil(Impot * TauxI1));
-  // const Impot2 = Math.max(0,Math.ceil(Impot * TauxI2));
-
-  // const Impot1 = Math.max(0, Math.ceil(Impot * TauxI1));
-  // const Impot2 = Math.max(0, Math.ceil(Impot * TauxI2));
 
   let Impot1 = Impot * TauxI1;
   let Impot2 = Impot * TauxI2;
@@ -1056,20 +764,6 @@ function runTaxSimulationTwo() {
 
   const credit = credit1 + credit2;
 
-  /*if (Impot <= 0) {
-    // Impot = credit1 - credit2;
-    ImpPlaf = 0;
-    Decote = 0;
-    RedMin = 0;
-    HR = 0;
-    PF = 0;
-    if (credit === 0) {
-      Impot = 0;
-    } else {
-      Impot = -credit;
-    }
-  }*/
-
   if (Impot1 <= 0 || isNaN(Impot1)) {
     Impot1 = 0;
     Taux1Pourcent = 0;
@@ -1078,25 +772,6 @@ function runTaxSimulationTwo() {
     Impot2 = 0;
     Taux2Pourcent = 0;
   }
-
-  // Résultats globaux
-  // setResult('household-taxable-reference-income', RFR, { round: 'euro' });
-  // setResult('household-taxable-income', Rimpo, { round: 'euro' });
-  // setResult('household-tax-amount', Impot, { round: 'euro' });
-  // setResult('household-tax-rate', Taux, { round: 'decimal' });
-  // setResult('household-tax-shares', Parts, { round: 'decimal' });
-  // setResult('household-quotient', Quotient, { round: 'euro' });
-
-  // Résultats par déclarant
-  // setResult('reference-taxable-income-1', Rimpo1, { round: 'euro' });
-  // setResult('reference-taxable-income-2', Rimpo2, { round: 'euro' });
-  // setResult('tax-amount-1', Impot1, { round: 'euro' });
-  // setResult('tax-amount-2', Impot2, { round: 'euro' });
-  // setResult('tax-rate-1', Taux1Pourcent, { round: 'decimal' });
-  // setResult('tax-rate-2', Taux2Pourcent, { round: 'decimal' });
-
-  // document.getElementById('household-taxable-reference-income').innerHTML = (Math.ceil(RFR)).toLocaleString('fr-FR');
-  // setResult('household-taxable-reference-income', RFR);
 
   document.getElementById('household-taxable-reference-income').innerText = RFR.toLocaleString('fr-FR');
   document.getElementById('household-taxable-income').innerText = Rimpo.toLocaleString('fr-FR');
@@ -1117,22 +792,8 @@ function runTaxSimulationTwo() {
   document.getElementById('tax-amount-2').innerHTML = Math.round(Impot2);
   document.getElementById('tax-rate-1').innerHTML = Taux1Pourcent.toLocaleString('fr-FR');
   document.getElementById('tax-rate-2').innerHTML = Taux2Pourcent.toLocaleString('fr-FR');
-  
-  // document.getElementById('household-decote').innerHTML = (Math.ceil(Decote)).toLocaleString('fr-FR');
-  // document.getElementById('household-tax-reduction-applied').innerHTML = (Math.ceil(RedMin)).toLocaleString('fr-FR');
-  // document.getElementById('household-tax-credit-applied').innerHTML = credit.toLocaleString('fr-FR');
-  // document.getElementById('household-high-income-contribution').innerHTML = HR.toLocaleString('fr-FR');
-  // document.getElementById('household-social-contribution-realestate').innerHTML = PF.toLocaleString('fr-FR');
 }
 
 function setResult(id, value) {
   document.getElementById(id).innerHTML = (Math.ceil(value)).toLocaleString('fr-FR');
 }
-
-/*function setResult(id, value, options = {}) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (options.round === 'euro') value = Math.ceil(value);
-  if (options.round === 'decimal') value = Math.round(value * 10) / 10;
-  el.innerText = isNaN(value) ? '0' : value;
-}*/
