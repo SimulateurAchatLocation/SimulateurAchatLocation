@@ -298,7 +298,7 @@ function computeTotalSituation(capital, cTotalMontage, epargne, placementSup) {
   }
 }*/
 
-function renderMensualitesCDC({ m1, d1, m2, d2, dMax, ids }) {
+/*function renderMensualitesCDC({ m1, d1, m2, d2, dMax, ids }) {
   const { loan1Monthly, loan1Duration, loan2Monthly, loan2Duration, loanTextWrapper } = ids;
 
   const D1 = Math.round(d1 || 0);
@@ -350,6 +350,54 @@ function renderMensualitesCDC({ m1, d1, m2, d2, dMax, ids }) {
     if (elZero) elZero.textContent = "0 €";
     setText(loan2Duration, `De ${D1} à ${DMAX} ans`);
   }
+}*/
+
+function renderMensualitesCDC({ m1, d1, m2, d2, dMax, ids }) {
+  const { 
+    loan1Monthly, loan1Duration, 
+    loan2Monthly, loan2Duration, 
+    loan0Monthly, loan0Duration, 
+    loanTextWrapper 
+  } = ids;
+
+  const D1 = Math.round(d1 || 0);
+  const D2 = Math.round(d2 || 0);
+  const DMAX = Math.round(dMax || 0);
+
+  // 1. Reset et masquage des blocs optionnels
+  const block2 = document.getElementById(loan2Monthly)?.closest('.credit-sim_credit');
+  const block0 = document.querySelector(loanTextWrapper);
+  
+  if (block2) block2.style.display = 'none';
+  if (block0) block0.style.display = 'none';
+
+  const hasLoan2 = m2 > 0 && D2 > 0;
+
+  // --- LIGNE 1 : Début du remboursement ---
+  if (!hasLoan2) {
+    setEuroText(loan1Monthly, m1);
+    setText(loan1Duration, `De 0 à ${D1} ans`);
+  } else {
+    const firstPeriodEnd = Math.min(D1, D2);
+    setEuroText(loan1Monthly, m1 + m2);
+    setText(loan1Duration, `De 0 à ${firstPeriodEnd} ans`);
+
+    // --- LIGNE 2 : Fin du crédit le plus long ---
+    if (D1 > firstPeriodEnd) {
+      if (block2) block2.style.display = 'block';
+      setEuroText(loan2Monthly, m1);
+      setText(loan2Duration, `De ${firstPeriodEnd} à ${D1} ans`);
+    }
+  }
+
+  // --- LIGNE 3 : Complément jusqu'à DMAX ---
+  if (D1 < DMAX) {
+    if (block0) {
+      block0.style.display = 'block';
+      setText(loan0Monthly, "0 €");
+      setText(loan0Duration, `De ${D1} à ${DMAX} ans`);
+    }
+  }
 }
 
 function runAppropriateSimulation() {
@@ -376,9 +424,9 @@ function runAppropriateSimulation() {
       loan1Duration: "loan1A_duration_years",
       loan2Monthly: "loan2A_monthly_payment",
       loan2Duration: "loan2A_duration_years",
-      // loan0Monthly: "loan0A_monthly_payment",
-      // loan0Duration: "loan0A_duration_years",
-      loanTextWrapper: ".credit-sim_credit.is-a2"
+      loan0Monthly: "loan0A_monthly_payment",
+      loan0Duration: "loan0A_duration_years",
+      loanTextWrapper: ".is-a0"
     }
   });
 
@@ -393,9 +441,9 @@ function runAppropriateSimulation() {
       loan1Duration: "loan1B_duration_years",
       loan2Monthly: "loan2B_monthly_payment",
       loan2Duration: "loan2B_duration_years",
-      // loan0Monthly: "loan0B_monthly_payment",
-      // loan0Duration: "loan0B_duration_years",
-      loanTextWrapper: ".credit-sim_credit.is-b2"
+      loan0Monthly: "loan0B_monthly_payment",
+      loan0Duration: "loan0B_duration_years",
+      loanTextWrapper: ".is-b0"
     }
   });
 
