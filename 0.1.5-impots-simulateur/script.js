@@ -466,7 +466,7 @@ function runTaxSimulationOne() {
 
   // Étape 11 : Impôt après plafonnement
   const ImpotApresPlafRaw = calculateTax(Rimposable) - plafonnement;
-  let ImpotApresPlaf = Math.ceil(ImpotApresPlafRaw);
+  let ImpotApresPlaf = ImpotApresPlafRaw;
 
   // Étape 12 : Décote
   // let decote = ImpotApresPlafRaw <= 1964 ? Math.max(889 - ImpotApresPlafRaw * 0.4525, 0) : 0;
@@ -488,7 +488,7 @@ function runTaxSimulationOne() {
   // Étape 15 : Prélèvements sociaux fonciers
   let PrelevSociauxFoncier = RevenuF * 0.172;
 
-  let Impot = Math.round(ImpotApresPlaf) - Math.round(decote) - Math.round(reductionMin) - Crédit + HautsRevenus + PrelevSociauxFoncier;
+  let Impot = Math.round(ImpotApresPlaf - decote - reductionMin - Crédit + HautsRevenus + PrelevSociauxFoncier);
 
   // Étape 16 : Taux
   const Taux = Revenu <= 0 ? 0 : Math.max(0, ((Impot / Revenu) * 100).toFixed(1));
@@ -496,7 +496,7 @@ function runTaxSimulationOne() {
   // Injection des résultats
   document.getElementById('household-taxable-reference-income').innerText = RFR.toLocaleString('fr-FR');
   document.getElementById('household-taxable-income').innerText = Rimposable.toLocaleString('fr-FR');
-  document.getElementById('household-tax-amount').innerText = Math.round(Impot);
+  document.getElementById('household-tax-amount').innerText = Math.round(Impot).toLocaleString('fr-FR');
   document.getElementById('household-tax-rate').innerText = Taux.toLocaleString('fr-FR');
   document.getElementById('household-tax-shares').innerText = Parts.toFixed(2);
   document.getElementById('household-quotient').innerText = (Math.ceil(quotient)).toLocaleString('fr-FR');
