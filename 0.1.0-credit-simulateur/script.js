@@ -356,7 +356,7 @@ function renderMensualitesCDC({ m1, d1, m2, d2, dMax, ids }) {
   const { 
     loan1Monthly, loan1Duration, 
     loan2Monthly, loan2Duration, 
-    loan0Monthly, loan0Duration, 
+    loan0Duration, 
     loanTextWrapper 
   } = ids;
 
@@ -394,8 +394,7 @@ function renderMensualitesCDC({ m1, d1, m2, d2, dMax, ids }) {
   if (D1 < DMAX) {
     if (block0) {
       block0.style.display = 'block';
-      setText(loan0Monthly, "0 €");
-      setText(loan0Duration, `De ${D1} à ${DMAX} ans`);
+      setText(loan0Duration, `0€ de ${D1} à ${DMAX} ans`);
     }
   }
 }
@@ -424,7 +423,6 @@ function runAppropriateSimulation() {
       loan1Duration: "loan1A_duration_years",
       loan2Monthly: "loan2A_monthly_payment",
       loan2Duration: "loan2A_duration_years",
-      loan0Monthly: "loan0A_monthly_payment",
       loan0Duration: "loan0A_duration_years",
       loanTextWrapper: ".is-a0"
     }
@@ -441,7 +439,6 @@ function runAppropriateSimulation() {
       loan1Duration: "loan1B_duration_years",
       loan2Monthly: "loan2B_monthly_payment",
       loan2Duration: "loan2B_duration_years",
-      loan0Monthly: "loan0B_monthly_payment",
       loan0Duration: "loan0B_duration_years",
       loanTextWrapper: ".is-b0"
     }
