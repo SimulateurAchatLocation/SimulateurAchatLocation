@@ -319,11 +319,11 @@ function runAppropriateSimulation() {
 
 // Barème de l’impôt sur le revenu
 function calculateTax(revenue) {
-  if (revenue <= 11497) return 0;
-  else if (revenue <= 29315) return (revenue - 11497) * 0.11;
-  else if (revenue <= 83823) return (revenue - 29315) * 0.30 + (29315 - 11497) * 0.11;
-  else if (revenue <= 180294) return (revenue - 83823) * 0.41 + (83823 - 29315) * 0.30 + (29315 - 11497) * 0.11;
-  else return (revenue - 180294) * 0.45 + (180294 - 83823) * 0.41 + (83823 - 29315) * 0.30 + (29315 - 11497) * 0.11;
+  if (revenue <= 11600) return 0;
+  else if (revenue <= 29579) return (revenue - 11600) * 0.11;
+  else if (revenue <= 84577) return (revenue - 29579) * 0.30 + (29579 - 11600) * 0.11;
+  else if (revenue <= 181917) return (revenue - 84577) * 0.41 + (84577 - 29579) * 0.30 + (29579 - 11600) * 0.11;
+  else return (revenue - 181917) * 0.45 + (181917 - 84577) * 0.41 + (84577 - 29579) * 0.30 + (29579 - 11600) * 0.11;
 }
 
 runAppropriateSimulation(); // initialisation au chargement
@@ -389,9 +389,9 @@ function runTaxSimulationOne() {
   if (FraisReelsCoche) {
     RevenuSR = Revenu - FraisR;
   } else if (Abattement && Retraite) {
-    RevenuSR = Revenu * 0.1 <= 450 ? Revenu - 450 : Math.max(Revenu * 0.9, Revenu - 4399);
+    RevenuSR = Revenu * 0.1 <= 454 ? Revenu - 454 : Math.max(Revenu * 0.9, Revenu - 4439);
   } else if (Abattement && !Retraite) {
-    RevenuSR = Revenu * 0.1 <= 504 ? Revenu - 504 : Math.max(Revenu * 0.9, Revenu - 14426);
+    RevenuSR = Revenu * 0.1 <= 509 ? Revenu - 509 : Math.max(Revenu * 0.9, Revenu - 14555);
   }
 
   // Étape 3 : Revenu net global
@@ -400,10 +400,10 @@ function runTaxSimulationOne() {
   // Étape 4 : AbattementS
   let AbattementS = 0;
   if (Over65 || CaseInvalide > 0) {
-    if (RevenuNetGlobal <= 17510) {
-      AbattementS = 2796;
-    } else if (RevenuNetGlobal <= 28170 && RevenuNetGlobal > 17510) {
-      AbattementS = 1398;
+    if (RevenuNetGlobal <= 17670) {
+      AbattementS = 2822;
+    } else if (RevenuNetGlobal <= 28430 && RevenuNetGlobal > 17670) {
+      AbattementS = 1411;
     } else {
       AbattementS = 0;
     }
@@ -457,10 +457,10 @@ function runTaxSimulationOne() {
 
   // Étape 10 : Plafonnement
   const plafonnement = Math.min(
-    2 * 1791 * (Parts - 1) +
-    (2 * CaseInvalide + EnfantEH + EnfantA / 2 + Invalide) * 1785 +
-    ParentIValue * 642 +
-    VeufValue * 1993,
+    2 * 1807 * (Parts - 1) +
+    (2 * CaseInvalide + EnfantEH + EnfantA / 2 + Invalide) * 1801 +
+    ParentIValue * 648 +
+    VeufValue * 2011,
     calculateTax(Rimposable) - ImpotIntermediaire
   );
 
@@ -469,9 +469,9 @@ function runTaxSimulationOne() {
   let ImpotApresPlaf = ImpotApresPlafRaw;
 
   // Étape 12 : Décote
-  // let decote = ImpotApresPlafRaw <= 1964 ? Math.max(889 - ImpotApresPlafRaw * 0.4525, 0) : 0;
-  let decote = ImpotApresPlafRaw <= 1964 ? Math.min(889 - ImpotApresPlafRaw * 0.4525, ImpotApresPlafRaw) : 0;
-  // const decote = ImpotApresPlaf <= 1964 ? -Math.min(889 + ImpotApresPlaf * 0.4525, 0) : 0;
+  // let decote = ImpotApresPlafRaw <= 1982 ? Math.max(897 - ImpotApresPlafRaw * 0.4525, 0) : 0;
+  let decote = ImpotApresPlafRaw <= 1982 ? Math.min(897 - ImpotApresPlafRaw * 0.4525, ImpotApresPlafRaw) : 0;
+  // const decote = ImpotApresPlaf <= 1982 ? -Math.min(897 + ImpotApresPlaf * 0.4525, 0) : 0;
 
   // Étape 13 : Réduction min
   // const reductionMin = Math.min(ImpotApresPlaf - decote, Réduction);
@@ -564,20 +564,20 @@ function runTaxSimulationTwo() {
   let RS2 = revenu2;
 
   if (fraisRCoche1) RS1 = revenu1 - fraisR1;
-  else if (abattement1 && retraite1) RS1 = revenu1 * 0.1 <= 450 ? revenu1 - 450 : Math.max(revenu1 * 0.9, revenu1 - 4399);
-  else if (abattement1 && !retraite1) RS1 = revenu1 * 0.1 <= 504 ? revenu1 - 504 : Math.max(revenu1 * 0.9, revenu1 - 14426);
+  else if (abattement1 && retraite1) RS1 = revenu1 * 0.1 <= 454 ? revenu1 - 454 : Math.max(revenu1 * 0.9, revenu1 - 4439);
+  else if (abattement1 && !retraite1) RS1 = revenu1 * 0.1 <= 509 ? revenu1 - 509 : Math.max(revenu1 * 0.9, revenu1 - 14555);
 
   if (fraisRCoche2) RS2 = revenu2 - fraisR2;
-  else if (abattement2 && retraite2) RS2 = revenu2 * 0.1 <= 450 ? revenu2 - 450 : Math.max(revenu2 * 0.9, revenu2 - 4399);
-  else if (abattement2 && !retraite2) RS2 = revenu2 * 0.1 <= 504 ? revenu2 - 504 : Math.max(revenu2 * 0.9, revenu2 - 14426);
+  else if (abattement2 && retraite2) RS2 = revenu2 * 0.1 <= 454 ? revenu2 - 454 : Math.max(revenu2 * 0.9, revenu2 - 4439);
+  else if (abattement2 && !retraite2) RS2 = revenu2 * 0.1 <= 509 ? revenu2 - 509 : Math.max(revenu2 * 0.9, revenu2 - 14555);
 
   // Revenu net global
   let revenuNet1 = RS1 + revenuF1 - deduction1;
   let revenuNet2 = RS2 + revenuF2 - deduction2;
   let revenuNetGlobal;
 
-  if ((retraite1 && retraite2 && revenu1 < 4500 && (450 + revenu2 * 0.1) > 4399) || (retraite1 && retraite2 && revenu2 < 4500 && (450 + revenu1 * 0.1) > 4399) || retraite1 && retraite2 && ((revenu1 + revenu2) * 0.1) > 4399) {
-    revenuNetGlobal = revenu1 + revenu2 - 4399;
+  if ((retraite1 && retraite2 && revenu1 < 4540 && (454 + revenu2 * 0.1) > 4439) || (retraite1 && retraite2 && revenu2 < 4540 && (454 + revenu1 * 0.1) > 4439) || retraite1 && retraite2 && ((revenu1 + revenu2) * 0.1) > 4439) {
+    revenuNetGlobal = revenu1 + revenu2 - 4439;
   } else {
     revenuNetGlobal = revenuNet1 + revenuNet2;
   }
@@ -585,8 +585,8 @@ function runTaxSimulationTwo() {
   // AbattementS
   function getAbattement(R, plus65, ci) {
     if (plus65 || ci) {
-      if (R <= 17510) return 2796;
-      if (R <= 28170 && R > 17510) return 1398;
+      if (R <= 17670) return 2822;
+      if (R <= 28430 && R > 17670) return 1411;
     }
     return 0;
   }
@@ -601,14 +601,14 @@ function runTaxSimulationTwo() {
     const eligible2 = plus65_2 || ci_2;
 
     if (eligible1 && eligible2) {
-      if (revenuNetGlobal <= 17510) return 2 * 2796;
-      if (revenuNetGlobal <= 28170 && revenuNetGlobal > 17510) return 2 * 1398;
+      if (revenuNetGlobal <= 17670) return 2 * 2822;
+      if (revenuNetGlobal <= 28430 && revenuNetGlobal > 17670) return 2 * 1411;
       return 0;
     }
 
     if (eligible1 || eligible2) {
-      if (revenuNetGlobal <= 17510) return 2796;
-      if (revenuNetGlobal <= 28170 && revenuNetGlobal > 17510) return 1398;
+      if (revenuNetGlobal <= 17670) return 2822;
+      if (revenuNetGlobal <= 28430 && revenuNetGlobal > 17670) return 1411;
       return 0;
     }
 
@@ -670,21 +670,21 @@ function runTaxSimulationTwo() {
   // const ImpBrut = calculateTax(Rimpo);
   const ImpBrut = calculateTax(Rimpo / 2) * 2;
   const Plaf = Math.min(
-    2 * 1791 * (Parts - 2) + (2 * (caseInvalide1 + caseInvalide2) + EnfantEH + EnfantA / 2 + Invalide) * 1785,
+    2 * 1807 * (Parts - 2) + (2 * (caseInvalide1 + caseInvalide2) + EnfantEH + EnfantA / 2 + Invalide) * 1801,
     ImpBrut - ImpInter
   );
 
   // Plafonnement 1
-  const Plaf1Base = 2 * 1791 * ((Parts - caseInvalide2 + caseInvalide1) * 0.5 - 1);
-  const Plaf1Supp = (4 * caseInvalide1 + EnfantEH + EnfantAH / 2 + Invalide) * 1785 / 2;
+  const Plaf1Base = 2 * 1807 * ((Parts - caseInvalide2 + caseInvalide1) * 0.5 - 1);
+  const Plaf1Supp = (4 * caseInvalide1 + EnfantEH + EnfantAH / 2 + Invalide) * 1801 / 2;
   const Plaf1 = Math.min(
     Plaf1Base + Plaf1Supp,
     calculateTax(Rimpo1) - ImpotIntermediaire1
   );
 
   // Plafonnement 2
-  const Plaf2Base = 2 * 1791 * ((Parts - caseInvalide1 + caseInvalide2) * 0.5 - 1);
-  const Plaf2Supp = (4 * caseInvalide2 + EnfantEH + EnfantAH / 2 + Invalide) * 1785 / 2;
+  const Plaf2Base = 2 * 1807 * ((Parts - caseInvalide1 + caseInvalide2) * 0.5 - 1);
+  const Plaf2Supp = (4 * caseInvalide2 + EnfantEH + EnfantAH / 2 + Invalide) * 1801 / 2;
   const Plaf2 = Math.min(
     Plaf2Base + Plaf2Supp,
     calculateTax(Rimpo2) - ImpotIntermediaire2
@@ -702,13 +702,13 @@ function runTaxSimulationTwo() {
 
 
   // Décote
-  // const Decote = ImpPlaf <= 3248 ? -Math.min(1470 - ImpPlaf * 0.4525, 0) : 0;
-  let Decote = ImpPlaf <= 3248 ? Math.min(1470 - ImpPlaf * 0.4525, ImpPlaf) : 0;
+  // const Decote = ImpPlaf <= 3277 ? -Math.min(1483 - ImpPlaf * 0.4525, 0) : 0;
+  let Decote = ImpPlaf <= 3277 ? Math.min(1483 - ImpPlaf * 0.4525, ImpPlaf) : 0;
 
-  // const Decote1 = ImpPlaf1 <= 1964 ? -Math.min(889 - ImpPlaf1 * 0.4525, 0) : 0;
-  // const Decote2 = ImpPlaf2 <= 1964 ? -Math.min(889 - ImpPlaf2 * 0.4525, 0) : 0;
-  const Decote1 = ImpPlaf1 <= 1964 ? Math.min(889 - ImpPlaf1 * 0.4525, ImpPlaf1) : 0;
-  const Decote2 = ImpPlaf2 <= 1964 ? Math.min(889 - ImpPlaf2 * 0.4525, ImpPlaf2) : 0;
+  // const Decote1 = ImpPlaf1 <= 1982 ? -Math.min(897 - ImpPlaf1 * 0.4525, 0) : 0;
+  // const Decote2 = ImpPlaf2 <= 1982 ? -Math.min(897 - ImpPlaf2 * 0.4525, 0) : 0;
+  const Decote1 = ImpPlaf1 <= 1982 ? Math.min(897 - ImpPlaf1 * 0.4525, ImpPlaf1) : 0;
+  const Decote2 = ImpPlaf2 <= 1982 ? Math.min(897 - ImpPlaf2 * 0.4525, ImpPlaf2) : 0;
 
 
   // Réduction min
