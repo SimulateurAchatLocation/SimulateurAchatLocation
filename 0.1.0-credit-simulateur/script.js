@@ -90,7 +90,13 @@ function getRateValue(id) {
 function computeSingleLoan(prefix) {
   const capital = getNumericValue(prefix + "_capital");
   const cFixes  = getNumericValue(prefix + "_fixed_fees");
-  const tCr     = getRateValue(prefix + "_rate_credit");     // décimal
+  let tCr = getRateValue(prefix + "_rate_credit");
+  // Évite la divergence / division instable à 0%
+  // 0% est traité comme 0.000001%
+  if (tCr === 0) {
+    tCr = 0.000001 / 100;
+  }
+
   const tAss    = getRateValue(prefix + "_rate_insurance");  // décimal
   const duree   = getNumericValue(prefix + "_duration");     // années
 
@@ -116,7 +122,7 @@ function computeSingleLoan(prefix) {
 
   // Mensualité (formule du PDF)
   let mensualite = 0;
-  if (tCr === 0) {
+  /*if (tCr === 0) {
     // cas limite : pas d’intérêts
     mensualite = ((capital / (duree * 12)) + (cAssurance / duree)) * (1 / 12);
   } else {
@@ -125,7 +131,13 @@ function computeSingleLoan(prefix) {
     const fraction1   = numerator / denominator;
     const fraction2   = cAssurance / duree;
     mensualite        = (fraction1 + fraction2) * (1 / 12);
-  }
+  }*/
+
+  const numerator   = capital * tCr;
+  const denominator = 1 - Math.pow(1 + tCr / 12, -duree * 12);
+  const fraction1   = numerator / denominator;
+  const fraction2   = cAssurance / duree;
+  mensualite        = (fraction1 + fraction2) * (1 / 12);
 
   // CCrédit partiel : 12*Durée*Mensualité - Capital - CAssurance + CFixes
   const cCreditPart = 12 * duree * mensualite - capital - cAssurance + cFixes;
