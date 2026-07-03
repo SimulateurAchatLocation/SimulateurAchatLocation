@@ -90,7 +90,7 @@ function getRateValue(id) {
 function computeSingleLoan(prefix) {
   const capital = getNumericValue(prefix + "_capital");
   const cFixes  = getNumericValue(prefix + "_fixed_fees");
-  const tCr     = getRateValue(prefix + "_rate_credit");     // décimal
+  let tCr = getRateValue(prefix + "_rate_credit");     // décimal
   // Évite la divergence / division instable à 0%
   // 0% est traité comme 0.000001%
   if (!tCr || tCr <= 0) {
