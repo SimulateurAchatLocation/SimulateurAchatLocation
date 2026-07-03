@@ -93,8 +93,8 @@ function computeSingleLoan(prefix) {
   let tCr = getRateValue(prefix + "_rate_credit");
   // Évite la divergence / division instable à 0%
   // 0% est traité comme 0.000001%
-  if (tCr === 0) {
-    tCr = 0.000001 / 100;
+  if (tCr <= 0) {
+    tCr = 0.0000001;
   }
 
   const tAss    = getRateValue(prefix + "_rate_insurance");  // décimal
